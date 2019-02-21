@@ -1,11 +1,14 @@
-# feup-lapd
+# FEUP LAPD
 Repository to host the LAPD project
 
 [report on overleaf](https://www.overleaf.com/project/5c6e7f6dbc4fc01eaea98c5d)
 
----
+## Entregas
+1. 14.03.2019 Delivery and Presentation: Project proposal
+2. 04.04.2019 Delivery and Presentation: Architecture and prototype
+3. 23.05.2019 Guest presentation: Smart Services and IoT - challenges and opportunities.
 
-### 15. Structuring the unstructured
+## 15. Structuring the unstructured
 Smartphones already include several sensors that can be used to improve the interaction with
 the phone (e.g., answer calls), monitor the user’s physical activity, and locate the user in
 indoor spaces. The accelerometer, gyroscope, and magnetometer are widely adopted to attain this goal. 
