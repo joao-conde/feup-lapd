@@ -3,6 +3,8 @@ Repository to host the LAPD project
 
 [report on overleaf](https://www.overleaf.com/project/5c6e7f6dbc4fc01eaea98c5d)
 
+[frauhnofer drive with some initial files](https://foldr.fraunhofer.pt/public/KREZM/browse)
+
 ## Entregas
 1. 14.03.2019 Delivery and Presentation: Project proposal
 2. 04.04.2019 Delivery and Presentation: Architecture and prototype
