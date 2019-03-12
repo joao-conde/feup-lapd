@@ -1,9 +1,9 @@
 # FEUP LAPD
 Repository to host the LAPD project
 
-[report on overleaf](https://www.overleaf.com/project/5c6e7f6dbc4fc01eaea98c5d)
-
-[frauhnofer drive with some initial files](https://foldr.fraunhofer.pt/public/KREZM/browse)
+ * [D1 report on overleaf](https://www.overleaf.com/project/5c6e7f6dbc4fc01eaea98c5d)
+ * [D1 slides on google slides](https://docs.google.com/presentation/d/1NvJW_P9WwHBwbEacZ1J-pC1pkdlGDi9zphYnHp0PHlc/edit)
+ * [frauhnofer drive with some initial files](https://foldr.fraunhofer.pt/public/KREZM/browse)
 
 ## Entregas
 1. 14.03.2019 Delivery and Presentation: Project proposal
