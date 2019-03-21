@@ -1,0 +1,6 @@
+env/
+.ipynb_checkpoints
+__pycache__
+htmlcov
+.coverage
+docs/_build
