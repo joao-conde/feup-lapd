@@ -19,8 +19,3 @@ This approach resembles a bit more that of npm, since it creates a Pipfile and a
  * install pipenv `pip install --user pipenv`
  * now just do `pipenv install MODULE`
  * and run with `pipenv run python main.py` **OR** activate venv with `pipenv shell`
-
-### Documentation
-
-* Windows: `docs/make.bat html`
-* Linux: `make html`

@@ -24,3 +24,15 @@ MongoDB [2](https://www.mongodb.com) database and Keycloak [3](https://www.keycl
 The objective of this application to migrate the datasets available in ASCII files to a NoSQL
 databased through the provided API. We will deliver the datasets, a public instance of the
 AICOS platform, and the API documentation
+
+
+
+## Tests
+* Run tests: `python -m unittest discover`
+* Run with [coverage](https://coverage.readthedocs.io/): `coverage run -m unittest discover`
+* Generate (HTML) report: `coverage report` | `coverage html`
+
+## Docs
+To generate the docs again, `cd stuns/docs` and:
+ * Windows: `make.bat html`
+ * Linux: `make html`
