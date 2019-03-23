@@ -11,9 +11,6 @@ def structure_the_unstructured(path):
     for f in get_all_files_recursively(path):
         d.dispatch(f)
 
-    print(files[0])
-    s = sensor()
-
 
 def parse_args():
     """Uses argparse module to create a pretty CLI interface that has the -h by default and that helps the user understand the arguments and their usage
