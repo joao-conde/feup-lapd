@@ -1,7 +1,8 @@
-from sensor import sensor
+from .sensor import sensor
 
 
 class accelerometer(sensor):
     """Sensor for accelerometer data, structure is `timestamp, x, y, z, precision`"""
-    def __init__(self):
-        super().__init__()
+    filter = ".*Accelerometer\.txt"
+    def __init__(self, file):
+        super().__init__(file)
