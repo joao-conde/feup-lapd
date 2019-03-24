@@ -1,3 +1,4 @@
+import os
 from sensors import *
 from sensors.sensor import sensor  # avoidable if sensor.sensor is used
 from re import search
@@ -16,7 +17,7 @@ class dispatcher():
 
     def get_file_details(self, file):
         """Given a file path, extract the information inherent to the folder structure into a dictionary"""
-        parts = file.split("/")
+        parts = os.path.normpath(file).split(os.sep)
         date = datetime.strptime(parts[5], '%Y-%m-%d_%H-%M-%S')
         return {
             "username": parts[1],  # user01
