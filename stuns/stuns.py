@@ -3,12 +3,12 @@ import argparse
 from sensors.sensor import sensor
 from dispatcher import dispatcher
 from utils import get_all_files_recursively
-
+from tqdm import tqdm
 
 def structure_the_unstructured(path):
-    print("path = ", path)
     d = dispatcher()
-    for f in get_all_files_recursively(path):
+    files = list(get_all_files_recursively(path)) # convert to list due to tqdm
+    for f in tqdm(files, unit=" files"): # apply progress bar
         d.dispatch(f)
 
 
