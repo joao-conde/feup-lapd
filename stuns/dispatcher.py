@@ -1,8 +1,9 @@
-import os, sys
-from sensors import *
-from sensors.sensor import sensor  # avoidable if sensor.sensor is used
+import os
+import sys
+from tqdm import tqdm
 from re import search
 from datetime import datetime
+from sensors import *
 
 
 class dispatcher():
@@ -10,7 +11,7 @@ class dispatcher():
 
     def get_subclasses(self):
         """Detects direct subclasses of the sensor class and returns them"""
-        return sensor.__subclasses__()
+        return sensor.sensor.__subclasses__()
 
     def get_file_details(self, file):
         """Given a file path, extract the information inherent to the folder structure into a dictionary"""
@@ -29,12 +30,8 @@ class dispatcher():
         basename = os.path.normpath(file).split(os.sep)[-1]
         can_receive = list(filter(lambda s: search(s.filter, file), self.get_subclasses()))
         if not len(can_receive):
-            pass
             print("No dispatcher found for '%s'" % basename, file=sys.stderr)
-        elif len(can_receive) > 1:
-            pass
-            print("Multiple dispatchers found for '%s'. Skipping..." % basename, file=sys.stderr)
         else:
-            # print("Dispatching '%s' to %s" % (basename, can_receive[0].__name__))
-            sensor_parser = can_receive[0](file, self.get_file_details(file))
-            metrics = sensor_parser.parse()
+            for s in tqdm(can_receive):
+                sensor_parser = s(file, self.get_file_details(file))
+                metrics = sensor_parser.parse()
