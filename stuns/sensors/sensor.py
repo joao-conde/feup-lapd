@@ -17,7 +17,8 @@ class sensor:
         list(map(self.parse_line, self.df.iterrows()))
         # with MongoClient('mongodb://localhost:27017/') as client:
         # db = client["database_name"]
-        # db.insert_many(map(self.parse_line, df.iterrows()))
+        # collection = db["collection_name"]
+        # collection.insert_many(map(self.parse_line, df.iterrows()))
 
     def preprocessing_dataframe(self):
         """This method can be extended by child classes to do things like bulk conversion of dataframe column from text to date object and other preprocessing operations done before bulk inserting into the database"""
