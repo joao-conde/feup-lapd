@@ -36,3 +36,7 @@ AICOS platform, and the API documentation
 To generate the docs again, `cd stuns/docs` and:
  * Windows: `make.bat html`
  * Linux: `make html`
+
+
+## Pip problems
+For some random pip related problems about "" you can use a proxy from [this list](https://free-proxy-list.net/) like so: `pip install MODULE --proxy="178.216.0.168:33364"`
