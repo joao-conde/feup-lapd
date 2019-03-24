@@ -37,3 +37,4 @@ class dispatcher():
         else:
             # print("Dispatching '%s' to %s" % (basename, can_receive[0].__name__))
             sensor_parser = can_receive[0](file, self.get_file_details(file))
+            metrics = sensor_parser.parse()

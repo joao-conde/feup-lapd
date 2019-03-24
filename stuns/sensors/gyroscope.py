@@ -7,4 +7,3 @@ class gyroscope(sensor):
     columns = ['timestamp', 'x,', 'y,', 'z,', 'precision']
     def __init__(self, file, details):
         super().__init__(file, details)
-    
