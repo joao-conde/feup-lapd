@@ -36,6 +36,5 @@ class dispatcher():
         elif len(can_receive) > 1:
             print("More than one dispatcher found for file '%s'. Skipping..." % basename)
         else:
-            sensor_parser = can_receive[0](file)
-            print(self.get_file_details(file))
-            print("Dispatching '%s' to %s" % (basename, sensor_parser.__class__.__name__))
+            print("Dispatching '%s' to %s" % (basename, can_receive[0].__name__))
+            sensor_parser = can_receive[0](file, self.get_file_details(file))
