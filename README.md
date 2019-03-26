@@ -26,6 +26,8 @@ databased through the provided API. We will deliver the datasets, a public insta
 AICOS platform, and the API documentation
 
 
+## Docker
+To start the database and API services, you must first guarantee that you have loaded the API image (demdata-api-docker-images). To do so, simply run `docker load --input demdata-api-docker-images`. After that, simply run `docker-compose up` from the repository root folder.
 
 ## Tests
 * Run tests: `python -m unittest discover`
