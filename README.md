@@ -39,6 +39,28 @@ To generate the docs again, `cd stuns/docs` and:
  * Windows: `make.bat html`
  * Linux: `make html`
 
-
 ## Pip problems
 For some random pip related problems about "" you can use a proxy from [this list](https://free-proxy-list.net/) like so: `pip install MODULE --proxy="178.216.0.168:33364"`
+
+# Possible features of the parser suggested at the meeting in Fraunhofer AICOS
+
+## Data Verification
+
+1. Timestamps
+  * Ensure ascending order
+  * Consistent sampling frequency
+  * Negative timestamps
+  * Too short samples (begin and end timestamp too close, possibility of defining minimum time for a sample)
+2. De-calibration of the magnetometer
+3. Column completness
+
+
+## Data Visualization
+
+1. Drag & drop ASCII files to parser
+2. Make plots of the different sensors data
+
+
+## Data Visualization
+
+1. 
