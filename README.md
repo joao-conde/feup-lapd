@@ -59,8 +59,3 @@ For some random pip related problems about "" you can use a proxy from [this lis
 
 1. Drag & drop ASCII files to parser
 2. Make plots of the different sensors data
-
-
-## Data Visualization
-
-1. 
