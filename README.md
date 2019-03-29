@@ -47,10 +47,10 @@ For some random pip related problems about "" you can use a proxy from [this lis
 ## Data Verification
 
 1. Timestamps
-  * Ensure ascending order
-  * Consistent sampling frequency
-  * Negative timestamps
-  * Too short samples (begin and end timestamp too close, possibility of defining minimum time for a sample)
+   * Ensure ascending order
+   * Consistent sampling frequency
+   * Negative timestamps
+   * Too short samples (begin and end timestamp too close, possibility of defining minimum time for a sample)
 2. De-calibration of the magnetometer
 3. Column completness
 
