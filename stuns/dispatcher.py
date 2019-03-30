@@ -9,6 +9,9 @@ from sensors import *
 class dispatcher():
     """class used to interpret network file system paths and to dispatch them to the correct sensor parser"""
 
+    def __init__(self, verbose=False):
+        self.verbose = verbose
+
     def get_subclasses(self):
         """Detects direct subclasses of the sensor class and returns them"""
         return sensor.sensor.__subclasses__()
@@ -22,7 +25,7 @@ class dispatcher():
             "source":   parts[2],  # Protocol
             "location": parts[3],  # Right Pocket
             "device":   parts[4],  # IoTip_Active
-            "date":     date      # date time object
+            "date":     date       # date time object
         }
 
     def dispatch(self, file):
@@ -30,8 +33,11 @@ class dispatcher():
         basename = os.path.normpath(file).split(os.sep)[-1]
         can_receive = list(filter(lambda s: search(s.filter, file), self.get_subclasses()))
         if not len(can_receive):
-            print("No dispatcher found for '%s'" % basename, file=sys.stderr)
+            if self.verbose:
+                print("No dispatcher found for '%s'" % basename, file=sys.stderr)
         else:
+            # TODO: decide if this is necessary: can there be more than one dispatcher for each file?
             for s in tqdm(can_receive):
                 sensor_parser = s(file, self.get_file_details(file))
                 metrics = sensor_parser.parse()
+            return metrics # TODO: handle multiple dispatched
