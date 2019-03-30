@@ -7,7 +7,8 @@ from tqdm import tqdm
 
 def structure_the_unstructured(path):
     d = dispatcher()
-    files = list(get_all_files_recursively(path)) # convert to list due to tqdm
+    files = list(get_all_files_recursively(path)) # convert to list for to tqdm
+    # TODO: make this operation parallel... how will the progress bar change with that
     for f in tqdm(files, unit=" files"): # apply progress bar
         d.dispatch(f)
 
