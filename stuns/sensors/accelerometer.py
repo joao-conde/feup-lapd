@@ -1,5 +1,5 @@
-import pandas as pd
 from .sensor import sensor
+import pandas as pd
 
 class accelerometer(sensor):
     """Sensor for accelerometer data, structure is `timestamp, x, y, z, precision`"""
@@ -10,5 +10,5 @@ class accelerometer(sensor):
         super().__init__(file, details)
 
     
-    def preprocessing_dataframe(self):
-        self.df["timestamp"] = pd.to_datetime(self.df["timestamp"], unit="ms")
+    # def preprocessing_dataframe(self):
+    #     self.df["timestamp"] = pd.to_datetime(self.df["timestamp"], unit="ms")
