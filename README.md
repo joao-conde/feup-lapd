@@ -17,7 +17,7 @@ indoor spaces. The accelerometer, gyroscope, and magnetometer are widely adopted
 The sensory data is described as time series data since these data points are
 captured in sequential time order. Over time, Fraunhofer AICOS collected several datasets and
 saved a file for each sensor/user, which were stored in a network filesystem. These files are
-accessed by our Data Scientists to apply Machine Learning (ML) technics and develop physical
+accessed by our Data Scientists to apply Machine Learning (ML) techniques and develop physical
 activity and indoor location algorithms. AICOS developed a platform developed that consists of
 a Spring Boot [1](https://spring.io/projects/spring-boot) enabled back-end server, providing a RESTful API; the data is stored on a
 MongoDB [2](https://www.mongodb.com) database and Keycloak [3](https://www.keycloak.org) is adopted for authentication.
