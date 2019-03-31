@@ -12,9 +12,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(1, os.path.abspath('../'))
 
 
 # -- Project information -----------------------------------------------------
@@ -24,9 +25,10 @@ copyright = '2019, João Conde, João Damas, Miguel Ramalho'
 author = 'João Conde, João Damas, Miguel Ramalho'
 
 # The short X.Y version
-version = ''
+version = '0.1'
 # The full version, including alpha/beta/rc tags
 release = ''
+autodoc_mock_imports = ["tqdm", "pandas", "pymongo"]
 
 
 # -- General configuration ---------------------------------------------------
