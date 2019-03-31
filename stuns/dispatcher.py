@@ -25,13 +25,14 @@ class dispatcher():
             "source":   parts[2],  # Protocol
             "location": parts[3],  # Right Pocket
             "device":   parts[4],  # IoTip_Active
-            "date":     date       # date time object
+            "recorded_at": datetime.timestamp(date)       # date time object
         }
 
     def dispatch(self, file):
         """given an acquisition filename, assign it to the correct sensor"""
         basename = os.path.normpath(file).split(os.sep)[-1]
         can_receive = list(filter(lambda s: search(s.filter, file), self.get_subclasses()))
+        metrics = dict()
         if not len(can_receive):
             if self.verbose:
                 print("No dispatcher found for '%s'" % basename, file=sys.stderr)
@@ -39,5 +40,5 @@ class dispatcher():
             # TODO: decide if this is necessary: can there be more than one dispatcher for each file?
             for s in tqdm(can_receive):
                 sensor_parser = s(file, self.get_file_details(file))
-                metrics = sensor_parser.parse()
-            return metrics # TODO: handle multiple dispatched
+                metrics = sensor_parser.parse(metrics)
+        return metrics
