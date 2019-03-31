@@ -5,13 +5,14 @@ from dispatcher import dispatcher
 from utils import get_all_files_recursively
 from tqdm import tqdm
 
+
 def structure_the_unstructured(path):
     d = dispatcher()
-    files = list(get_all_files_recursively(path)) # convert to list for to tqdm
+    files = list(get_all_files_recursively(path))  # convert to list for to tqdm
     # TODO: make this operation parallel... how will the progress bar change with that
-    for f in tqdm(files, unit=" files"): # apply progress bar
-        d.dispatch(f)
-
+    # apply progress bar
+    all_metrics = [d.dispatch(f) for f in tqdm(files, unit=" files")]
+    print("DONE", all_metrics)
 
 def parse_args():
     """Uses argparse module to create a pretty CLI interface that has the -h by default and that helps the user understand the arguments and their usage
