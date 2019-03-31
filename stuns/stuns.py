@@ -8,18 +8,16 @@ from tqdm import tqdm
 
 def structure_the_unstructured(path):
     d = dispatcher()
-
     users = dict()
     user_folders = list(get_all_direct_subfolders(path))
     for user_path in tqdm(user_folders, unit=" users"):
         user = os.path.basename(os.path.normpath(user_path))
         files = list(get_all_files_recursively(user_path))
         users[user] = [d.dispatch(f) for f in tqdm(files, unit=" files")]
-        # print(all_metrics)
 
     # TODO: make this operation parallel...?
     
-    produce_report(dict(), users)
+    produce_report(dict(), users) # TODO: include global metrics
 
 def parse_args():
     """Uses argparse module to create a pretty CLI interface that has the -h by default and that helps the user understand the arguments and their usage
