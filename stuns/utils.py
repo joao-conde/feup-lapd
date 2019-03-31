@@ -1,6 +1,7 @@
 import os
 import sys
 import glob
+import datetime
 import hashlib
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -37,4 +38,8 @@ def produce_report(execution_metrics, users):
     )
     template = env.get_template("report.html")
     with open("report.html", "w", encoding="utf-8") as out:
-        out.write(template.render(date="31 de Março", my_list=[1, 2, 3, 4], execution_metrics=execution_metrics, users=users))
+        out.write(template.render(
+            date=datetime.date.today().strftime("%B %d, %Y"),
+            execution_metrics=execution_metrics,
+            users=users
+        ))
