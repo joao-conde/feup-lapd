@@ -1,0 +1,18 @@
+{% macro display_user(name, files) %}
+	<p>{{files|length}} files found</p>
+	<ul class="uk-list uk-list-divider">
+	{% for file in files %}
+		{% if file|length > 0 %}
+		<li>
+			<div class="uk-card uk-card-default uk-card-body">
+				<ul class="uk-list uk-list-bullet">
+					{% for k,v in file.items() %}
+						<li>{{k}}: {{v}}</li>
+					{% endfor %}
+				</ul>
+			</div>
+		</li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+{% endmacro %}
