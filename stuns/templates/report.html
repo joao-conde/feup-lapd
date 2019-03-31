@@ -15,11 +15,11 @@
     </style>
 </head>
 
-<body>
+<body class="uk-margin-medium">
     <div class="uk-container">
-        <h1>Stuns Report from {{date}}</h1>
+        <h1>STUNS Report from {{date}}</h1>
         {% from 'user.html' import display_user %}
-        <ul uk-accordion class="uk-list-striped">
+        <ul uk-accordion class="uk-list-striped uk-margin-bottom">
             {% for user, files in users.items() %}
             <li>
                 <a class="uk-accordion-title" href="#">User: {{user}}</a>
@@ -27,6 +27,9 @@
             </li>
             {% endfor %}
         </ul>
+    </div>
+    <div class="uk-container uk-text-center uk-margin-bottom">
+        Made with ❤️ at FEUP
     </div>
 </body>
 
