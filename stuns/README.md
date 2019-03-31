@@ -14,8 +14,8 @@
 * `pip freeze > requirements.txt` to export all the installed modules (the file `requirements.txt` should always be committed)
 * Other users can enter then activate the virtual environment and install the modules with `pip install -r requirements.txt`
 
-### New Pipenv approach
+<!-- ### New Pipenv approach
 This approach resembles a bit more that of npm, since it creates a Pipfile and a Pipfile.lock.
  * install pipenv `pip install --user pipenv`
  * now just do `pipenv install MODULE`
- * and run with `pipenv run python main.py` **OR** activate venv with `pipenv shell`
+ * and run with `pipenv run python main.py` **OR** activate venv with `pipenv shell` -->
