@@ -1,18 +1,25 @@
+import os
 from sys import argv
 import argparse
 from sensors.sensor import sensor
 from dispatcher import dispatcher
-from utils import get_all_files_recursively
+from utils import get_all_direct_subfolders, get_all_files_recursively, produce_report
 from tqdm import tqdm
-
 
 def structure_the_unstructured(path):
     d = dispatcher()
-    files = list(get_all_files_recursively(path))  # convert to list for to tqdm
-    # TODO: make this operation parallel... how will the progress bar change with that
-    # apply progress bar
-    all_metrics = [d.dispatch(f) for f in tqdm(files, unit=" files")]
-    print("DONE", all_metrics)
+
+    users = dict()
+    user_folders = list(get_all_direct_subfolders(path))
+    for user_path in tqdm(user_folders, unit=" users"):
+        user = os.path.basename(os.path.normpath(user_path))
+        files = list(get_all_files_recursively(user_path))
+        users[user] = [d.dispatch(f) for f in tqdm(files, unit=" files")]
+        # print(all_metrics)
+
+    # TODO: make this operation parallel...?
+    
+    produce_report(dict(), users)
 
 def parse_args():
     """Uses argparse module to create a pretty CLI interface that has the -h by default and that helps the user understand the arguments and their usage
