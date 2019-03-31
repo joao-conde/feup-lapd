@@ -7,3 +7,5 @@ htmlcov
 docs/_build
 \.vscode/
 demdata-api-docker-images
+
+report\.html
