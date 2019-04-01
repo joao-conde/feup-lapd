@@ -29,6 +29,11 @@ AICOS platform, and the API documentation
 ## Docker
 To start the database and API services, you must first guarantee that you have loaded the API image (demdata-api-docker-images). To do so, simply run `docker load --input demdata-api-docker-images`. After that, simply run `docker-compose up` from the repository root folder.
 
+## Loading sample data provided
+After downloading the compressed binary dump file (.gz) and having the database service up and running, navigate to the directory where the file is and run `mongorestore --port 9090 --gzip --archive=dump_2019-04-01.gz`. If everythings goes well, you should see a few messages stating that 'x' documents were imported for each collection, and a _done_ message in the end is displayed.
+
+In order to query the data, fire a mongo shell or, for a prettier solution, download [Robo3T](https://download.robomongo.org/1.2.1/linux/robo3t-1.2.1-linux-x86_64-3e50a65.tar.gz). Setting up a connection should be pretty straightfoward (just leave default settings, other than port, which should be 9090). To view all documents in a collection, simply navigate in the GUI and double click on it (equivalent to, in a mongo shell, doing `use demdata_db`, `db.<collection_name>.find()`).
+
 ## Tests
 * Run tests: `python -m unittest discover`
 * Run with [coverage](https://coverage.readthedocs.io/): `coverage run -m unittest discover`
