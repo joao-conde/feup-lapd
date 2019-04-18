@@ -1,7 +1,7 @@
 import pandas as pd
-import pymongo
 import json
 import time
+from pymongo import MongoClient
 from utils import hash_file
 
 class sensor:
@@ -13,6 +13,7 @@ class sensor:
         self.file = file
         self.details = details
         self.df = pd.read_csv(self.file, delimiter=",", names=self.__class__.columns)
+        self.db = MongoClient('mongodb://localhost:9090/').demdata_db
 
     def parse(self, old_metrics=None):
         """Main method that handles a sensor file, performs preprocessing operation, extracts metrics and imports the data into the MongoDB instance"""
@@ -43,6 +44,6 @@ class sensor:
         # collection = db["collection_name"]
         # collection.insert_many(map(self.row_to_dict, self.df.iterrows()))
         # alternative that generates the whole JSON
-        records = json.loads(self.df.T.to_json()).values()
+        #records = json.loads(self.df.T.to_json()).values()
         # collection.insert(records)
         pass
