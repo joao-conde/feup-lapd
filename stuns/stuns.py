@@ -6,8 +6,8 @@ from dispatcher import dispatcher
 from utils import get_all_direct_subfolders, get_all_files_recursively, produce_report
 from tqdm import tqdm
 
-def structure_the_unstructured(path):
-    d = dispatcher()
+def structure_the_unstructured(path, verbose):
+    d = dispatcher(verbose)
     users = dict()
     user_folders = list(get_all_direct_subfolders(path))
     for user_path in tqdm(user_folders, unit=" users"):
@@ -26,9 +26,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Structuring The UNStructured, a command line tool for mobile sensor data. Network file system files into mongoDB")
     group_settings = parser.add_argument_group('global settings')
     group_settings.add_argument('-p', '--path', help='The source folder where the user folder are contained', required=True)
+    group_settings.add_argument('-v', '--verbose', help='Activate verbose execution', default=False, action="store_true")
     return vars(parser.parse_args())
 
 
 if __name__ == "__main__":
     args = parse_args()
-    structure_the_unstructured(args["path"])
+    structure_the_unstructured(args["path"], args["verbose"])
