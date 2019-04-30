@@ -44,10 +44,9 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
                                     device["type"] = "Device"
                                     device["_id"] = ObjectId()
                                 else:
-                                    sensors.append(d.dispatch(file, fp))
-                                    pass
-                        # TODO: insert device into acquisition, with all sensors
-
+                                    sensor = d.dispatch(file, fp)
+                                    if len(sensor): sensors.append(sensor)
+                        if len(sensors): device["sensors"] = sensors
                         c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
                         users[user] += (device, sensors)
 
@@ -55,8 +54,6 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
             print(subject)
             if subject:
                 c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
-            
-            exit()
 
     # TODO: make this operation parallel
 
