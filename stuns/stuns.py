@@ -1,25 +1,73 @@
 import os
 from sys import argv
 import argparse
+from datetime import datetime
+from collections import defaultdict
+import xml.etree.ElementTree as ET
+from tqdm import tqdm
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+
 from sensors.sensor import sensor
 from dispatcher import dispatcher
-from utils import get_all_direct_subfolders, get_all_files_recursively, produce_report
-from tqdm import tqdm
+from utils import get_all_direct_subfolders, get_all_files_recursively, produce_report, etree_to_dict
 
-def structure_the_unstructured(path, verbose):
-    d = dispatcher(verbose)
-    users = dict()
-    user_folders = list(get_all_direct_subfolders(path))
-    for user_path in tqdm(user_folders, unit=" users"):
-        user = os.path.basename(os.path.normpath(user_path))
-        files = list(get_all_files_recursively(user_path))
-        users[user] = list(filter(lambda m: len(m), [d.dispatch(f) for f in tqdm(files, unit=" files")]))
-    print(users)
-    # create acquisition for each user (with subject information from XML)
-    # for each device (look for description.xml)
-    # TODO: make this operation parallel...?
-    
-    produce_report(dict(), users) # TODO: include global metrics
+
+def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name):
+    # TODO: avoid duplicate, perhaps with hash in dataset document
+    with MongoClient(mongo) as client:
+        db = client[database_name]
+        # create dataset instance and get Id
+        c_ds = db["datasets"]
+        ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset", "name": dataset_name, "type": "Dataset", "hash": "TODO"})
+
+        users = defaultdict(list)
+        d = dispatcher(verbose)  # create a dispatcher instance
+
+        for user, uf in get_all_direct_subfolders(path):
+            # create acquisition
+            c_acq = db["acquisitions"]
+            acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
+
+            subject = None
+            for protocol, pf in get_all_direct_subfolders(uf):
+                for location, lf in get_all_direct_subfolders(pf):
+                    for device_str, df in get_all_direct_subfolders(lf):
+                        sensors = []
+                        for date_str, dtf in get_all_direct_subfolders(df):
+                            date = datetime.strptime(date_str, '%Y-%m-%d_%H-%M-%S')
+                            for file, fp in get_all_files_recursively(dtf):
+                                if file == "description.xml":
+                                    if not subject:
+                                        subject = parse_info_xml(fp, "user")
+                                    device = parse_info_xml(fp, "phone")
+                                    device["type"] = "Device"
+                                    device["_id"] = ObjectId()
+                                else:
+                                    sensors.append(d.dispatch(file, fp))
+                                    pass
+                        # TODO: insert device into acquisition, with all sensors
+
+                        c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
+                        users[user] += (device, sensors)
+
+            # TODO: insert subject into acquisition if != None
+            print(subject)
+            if subject:
+                c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
+            
+            exit()
+
+    # TODO: make this operation parallel
+
+    # produce_report(dict(), users)  # TODO: include global metrics
+
+
+def parse_info_xml(filepath, target):
+    """return a dict from xml of a given target"""
+    root = ET.parse(filepath).getroot()
+    return etree_to_dict(root.find(target))
+
 
 def parse_args():
     """Uses argparse module to create a pretty CLI interface that has the -h by default and that helps the user understand the arguments and their usage
