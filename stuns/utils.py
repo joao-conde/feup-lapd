@@ -6,9 +6,6 @@ import hashlib
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 
-def sum(a, b): return a + b
-
-
 def get_all_direct_subfolders(root_dir):
     """returns a generator of all the direct subfolders of a root dir"""
     return filter(os.path.isdir, [os.path.join(root_dir, f) for f in os.listdir(root_dir)])
