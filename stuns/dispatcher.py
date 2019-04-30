@@ -30,9 +30,10 @@ class dispatcher():
 
     def dispatch(self, file):
         """given an acquisition filename, assign it to the correct sensor"""
-        basename = os.path.normpath(file).split(os.sep)[-1]
-        can_receive = list(filter(lambda s: search(s.filter, file), self.get_subclasses()))
         metrics = dict()
+        basename = os.path.normpath(file).split(os.sep)[-1]
+        if basename == "description.xml": return metrics
+        can_receive = list(filter(lambda s: search(s.filter, file), self.get_subclasses()))
         if not len(can_receive):
             if self.verbose:
                 print("No dispatcher found for '%s'" % basename, file=sys.stderr)
