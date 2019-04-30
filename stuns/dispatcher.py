@@ -22,9 +22,9 @@ class dispatcher():
         date = datetime.strptime(parts[5], '%Y-%m-%d_%H-%M-%S')
         return {
             "username": parts[1],  # user01
-            "source":   parts[2],  # Protocol
+            "source": parts[2],  # Protocol
             "acquisition": parts[3],  # Right Pocket
-            "device":   parts[4],  # IoTip_Active
+            "device": parts[4],  # IoTip_Active
             "recorded_at": datetime.timestamp(date)       # date time object
         }
 
