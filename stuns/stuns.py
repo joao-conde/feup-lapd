@@ -13,8 +13,10 @@ def structure_the_unstructured(path, verbose):
     for user_path in tqdm(user_folders, unit=" users"):
         user = os.path.basename(os.path.normpath(user_path))
         files = list(get_all_files_recursively(user_path))
-        users[user] = [d.dispatch(f) for f in tqdm(files, unit=" files")]
-
+        users[user] = list(filter(lambda m: len(m), [d.dispatch(f) for f in tqdm(files, unit=" files")]))
+    print(users)
+    # create acquisition for each user (with subject information from XML)
+    # for each device (look for description.xml)
     # TODO: make this operation parallel...?
     
     produce_report(dict(), users) # TODO: include global metrics
