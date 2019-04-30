@@ -49,7 +49,6 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
                                     if len(sensor): 
                                         sensors.append(sensor)
                                         c_samples.insert(datapoints)
-                                    
                         if len(sensors):
                             device["sensors"] = sensors
                         c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
