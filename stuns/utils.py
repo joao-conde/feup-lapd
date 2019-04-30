@@ -28,6 +28,14 @@ def hash_file(filename, hasher=hashlib.sha256(), blocksize=1 << 16):
             buf = f.read(blocksize)
     return hasher.hexdigest()
 
+def etree_to_dict(t):
+    """parses an etree (xml) into a dic. original: https://stackoverflow.com/questions/7684333/converting-xml-to-dictionary-using-elementtree"""
+    d = {}
+    children = list(map(etree_to_dict, t.getchildren()))
+    if children: d[t.tag] = children
+    d.update((k, v) for k, v in t.attrib.items())
+    if t.text: d['text'] = t.text
+    return d
 
 def produce_report(execution_metrics, users):
     """Apply a Jinja2 template with the data so as to produce the execution report"""
