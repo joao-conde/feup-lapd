@@ -28,12 +28,13 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
             # create acquisition
             c_acq = db["acquisitions"]
             acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
-
+            c_samples = db["samples"]
             subject = None
             for protocol, pf in get_all_direct_subfolders(uf):
                 for location, lf in get_all_direct_subfolders(pf):
                     for device_str, df in get_all_direct_subfolders(lf):
                         sensors = []
+                        dev_id = ObjectId()
                         for date_str, dtf in get_all_direct_subfolders(df):
                             date = datetime.strptime(date_str, '%Y-%m-%d_%H-%M-%S')
                             for file, fp in get_all_files_recursively(dtf):
@@ -42,16 +43,17 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
                                         subject = parse_info_xml(fp, "user")
                                     device = parse_info_xml(fp, "phone")
                                     device["type"] = "Device"
-                                    device["_id"] = ObjectId()
+                                    device["_id"] = dev_id
                                 else:
-                                    sensor = d.dispatch(file, fp)
-                                    if len(sensor): sensors.append(sensor)
-                        if len(sensors): device["sensors"] = sensors
+                                    sensor, datapoints = d.dispatch(file, fp, acq_id, dev_id)
+                                    if len(sensor): 
+                                        sensors.append(sensor)
+                                        c_samples.insert(datapoints)
+                                    
+                        if len(sensors):
+                            device["sensors"] = sensors
                         c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
                         users[user] += (device, sensors)
-
-            # TODO: insert subject into acquisition if != None
-            print(subject)
             if subject:
                 c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
 

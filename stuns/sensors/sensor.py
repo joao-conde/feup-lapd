@@ -14,12 +14,19 @@ class sensor:
         self.file = file
         self.df = pd.read_csv(self.file, delimiter=",", names=self.__class__.columns)
 
-    def parse(self, old_metrics={}):
+    def parse(self, acquisition_id, device_id, sensor_id):
         """Main method that handles a sensor file, performs preprocessing operation, extracts metrics and imports the data into the MongoDB instance"""
         self.preprocessing_dataframe()
-        # self.df.apply(self.process_row, axis=1)
-        metrics = self.extract_metrics(old_metrics)
-        return metrics
+        
+        metrics = self.extract_metrics()
+
+        datapoints = list(json.loads(self.df.T.to_json()).values())
+        for i in range(len(datapoints)):
+            datapoints[i]["acquisitionId"] = acquisition_id
+            datapoints[i]["deviceId"] = device_id
+            datapoints[i]["sensorId"] = sensor_id
+
+        return metrics, datapoints
 
     def preprocessing_dataframe(self):
         """This method can be extended by child classes to do things like bulk conversion of dataframe column from text to date object and other preprocessing operations done before bulk inserting into the database"""
