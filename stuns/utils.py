@@ -8,13 +8,15 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 def get_all_direct_subfolders(root_dir):
     """returns a generator of all the direct subfolders of a root dir"""
-    return filter(os.path.isdir, [os.path.join(root_dir, f) for f in os.listdir(root_dir)])
+    def dirname(d): return os.path.basename(os.path.normpath(d)), d # returns the individual folder name, path
+    return map(dirname, filter(os.path.isdir, [os.path.join(root_dir, f) for f in os.listdir(root_dir)]))
 
 
 def get_all_files_recursively(root_dir):
     """returns a generator of all the files inside the given root_dir, recursively"""
     # TODO: maybe filter for .txt only or to ignore xml
-    return filter(os.path.isfile, glob.iglob(root_dir + '**/**', recursive=True))
+    def filename(f): return os.path.normpath(f).split(os.sep)[-1], f # returns filename without path, path
+    return map(filename, filter(os.path.isfile, glob.iglob(root_dir + '**/**', recursive=True)))
 
 
 def hash_file(filename, hasher=hashlib.sha256(), blocksize=1 << 16):
