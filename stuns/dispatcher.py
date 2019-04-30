@@ -23,7 +23,7 @@ class dispatcher():
         return {
             "username": parts[1],  # user01
             "source":   parts[2],  # Protocol
-            "location": parts[3],  # Right Pocket
+            "acquisition": parts[3],  # Right Pocket
             "device":   parts[4],  # IoTip_Active
             "recorded_at": datetime.timestamp(date)       # date time object
         }
