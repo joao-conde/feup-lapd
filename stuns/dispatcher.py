@@ -1,8 +1,10 @@
 import os
 import sys
-from tqdm import tqdm
 from re import search
+from tqdm import tqdm
 from datetime import datetime
+from bson.objectid import ObjectId
+
 from sensors import *
 
 
@@ -16,29 +18,19 @@ class dispatcher():
         """Detects direct subclasses of the sensor class and returns them"""
         return sensor.sensor.__subclasses__()
 
-    def get_file_details(self, file):
-        """Given a file path, extract the information inherent to the folder structure into a dictionary"""
-        parts = os.path.normpath(file).split(os.sep)
-        date = datetime.strptime(parts[5], '%Y-%m-%d_%H-%M-%S')
-        return {
-            "username": parts[1],  # user01
-            "source": parts[2],  # Protocol
-            "acquisition": parts[3],  # Right Pocket
-            "device": parts[4],  # IoTip_Active
-            "recorded_at": datetime.timestamp(date)       # date time object
-        }
-
     def dispatch(self, basename, file):
         """given an acquisition filename, assign it to the correct sensor"""
-        metrics = dict()
-        if basename == "description.xml": return metrics
+        if basename == "description.xml":
+            return {}
         can_receive = list(filter(lambda s: search(s.filter, file), self.get_subclasses()))
         if not len(can_receive):
             if self.verbose:
                 print("No dispatcher found for '%s'" % basename, file=sys.stderr)
+            return {}
         else:
-            # TODO: decide if this is necessary: can there be more than one dispatcher for each file?
-            for s in tqdm(can_receive):
-                sensor_parser = s(file, self.get_file_details(file))
-                metrics = sensor_parser.parse(metrics)
-        return metrics
+            s = can_receive[0]
+            if len(can_receive) > 1: 
+                print("Multiple dispatchers found for '%s', using %s" % (basename, s), file=sys.stderr)
+            sensor_parser = s(file)
+            metrics = sensor_parser.parse()
+            return {"_id": ObjectId(), "sensorType": s.name, "metrics": metrics}  # sensor
