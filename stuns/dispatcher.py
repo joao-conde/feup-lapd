@@ -28,10 +28,9 @@ class dispatcher():
             "recorded_at": datetime.timestamp(date)       # date time object
         }
 
-    def dispatch(self, file):
+    def dispatch(self, basename, file):
         """given an acquisition filename, assign it to the correct sensor"""
         metrics = dict()
-        basename = os.path.normpath(file).split(os.sep)[-1]
         if basename == "description.xml": return metrics
         can_receive = list(filter(lambda s: search(s.filter, file), self.get_subclasses()))
         if not len(can_receive):
