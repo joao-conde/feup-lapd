@@ -29,10 +29,10 @@
         </div>
         
         <ul uk-accordion class="uk-list-striped uk-margin-bottom">
-            {% for user, files in users.items() %}
+            {% for user, devices in users.items() %}
             <li>
                 <a class="uk-accordion-title" href="#">User: {{user}}</a>
-                <div class="uk-accordion-content">{{ display_user(user, files) }}</div>
+                <div class="uk-accordion-content">{{ display_user(user, devices[::2], devices[1::2]) }}</div>
             </li>
             {% endfor %}
         </ul>
