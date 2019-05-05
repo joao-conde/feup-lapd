@@ -19,6 +19,15 @@
     <div class="uk-container">
         <h1>STUNS Report from {{date}}</h1>
         {% from 'user.html' import display_user %}
+        <div class="uk-card uk-card-default uk-card-body">
+            <h3><strong>Global Migration Metrics</strong></h3>
+            <ul class="uk-list uk-list-bullet">
+                {% for k,v in execution_metrics.items() %}
+                    <li><b>{{k}}:</b> {{v}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
         <ul uk-accordion class="uk-list-striped uk-margin-bottom">
             {% for user, files in users.items() %}
             <li>
@@ -29,7 +38,7 @@
         </ul>
     </div>
     <div class="uk-container uk-text-center uk-margin-bottom">
-        Made with ❤️ at FEUP
+        Made with ❤️ at FEUP <!-- Fake btw -->
     </div>
 </body>
 
