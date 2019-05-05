@@ -7,5 +7,5 @@ htmlcov
 docs/_build
 \.vscode/
 demdata-api-docker-images
-
+MoverGLWValidationDataset
 report\.html
