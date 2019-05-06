@@ -27,7 +27,8 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         for user, uf in get_all_direct_subfolders(path):
             # create acquisition
             c_acq = db["acquisitions"]
-            acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
+            acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(datetime.now().timestamp()), "timeUnit": "SECONDS", "hasTimeSeriesSamples": True, "hasImageSamples": False, "hasVideoSamples": False, "type": "Acquisition"})
+
             c_samples = db["samples"]
             subject = None
             for protocol, pf in get_all_direct_subfolders(uf):
@@ -46,7 +47,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
                                     device["_id"] = dev_id
                                 else:
                                     sensor, datapoints = d.dispatch(file, fp, acq_id, dev_id)
-                                    if len(sensor): 
+                                    if len(sensor):
                                         sensors.append(sensor)
                                         c_samples.insert(datapoints)
                         if len(sensors):
