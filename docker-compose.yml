@@ -1,6 +1,7 @@
 version: '3'
 services:
     demdata_mongodb:
+        container_name: demdata_mongodb
         image: mongo
         expose:
             - 27017
@@ -26,6 +27,16 @@ services:
             - demdata_mongodb:demdata_mongodb
         depends_on:
             - demdata_mongodb
+    demdata_ui:
+        image: demdata/ui
+        networks:
+            - demdata_network
+        expose:
+            - 80
+        links:
+            - demdata_api:demdata_api
+        depends_on:
+          - demdata_api
     nginx_proxy:
         image: nginx:alpine
         networks:
@@ -40,13 +51,13 @@ services:
           - demdata_api
     extra_api:
         image: extra_api
+        networks:
+            - demdata_network
         build:
             context: ./api
         container_name: extra_api
         ports:
             - '5050:5050'
-        links:
-            - demdata_mongodb:demdata_mongodb
         depends_on:
             - demdata_mongodb
 networks:
