@@ -1,12 +1,13 @@
 {% macro display_user(name, devices, sensors) %}
 	{% for device, sensor_arr in zip(devices, sensors) %}
-		<h4>{{ device.model }}</h4>
+	<div class="uk-card uk-card-primary uk-card-body">
+		<h4 class="uk-card-title">Device: {{ device.model }}</h4>
 		<ul class="uk-list uk-list-divider">
 		{% if sensor_arr|length > 0 %}
 			{% for sensor in sensor_arr %}
 				<li>
-					<h5>{{ sensor.sensorType }}</h5>
-					<div class="uk-card uk-card-default uk-card-body">
+					<div class="uk-card uk-card-secondary uk-card-body">
+						<h5 class="uk-card-title">{{ sensor.sensorType }}</h5>
 						<ul class="uk-list uk-list-bullet">
 							{% for m,v in sensor.metrics.items() %}
 								<li>{{m}}: {{v}}</li>
@@ -15,7 +16,11 @@
 					</div>
 				</li>
 			{% endfor %}
+		{% else %}
+			<h5>No sensors found for this device.</h5>
 		{% endif %}
 		</ul>
+		<br>
+	</div>
 	{% endfor %}
 {% endmacro %}

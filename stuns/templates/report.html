@@ -12,6 +12,14 @@
         .uk-list.uk-list-bullet li {
             margin: 0;
         }
+
+        .uk-card-primary {
+            background-color: rgb(175, 175, 175);
+        }
+
+        .uk-card-secondary {
+            background-color: rgb(200, 200, 200);
+        }
     </style>
 </head>
 
@@ -21,7 +29,7 @@
         {% from 'user.html' import display_user %}
         <div class="uk-card uk-card-default uk-card-body">
             <h3><strong>Global Migration Metrics</strong></h3>
-            <ul class="uk-list uk-list-bullet">
+            <ul class="uk-list">
                 {% for k,v in execution_metrics.items() %}
                     <li><b>{{k}}:</b> {{v}}</li>
                 {% endfor %}
