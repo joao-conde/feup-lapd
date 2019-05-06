@@ -7,10 +7,11 @@
 			{% for sensor in sensor_arr %}
 				<li>
 					<div class="uk-card uk-card-secondary uk-card-body">
-						<h5 class="uk-card-title">{{ sensor.sensorType }}</h5>
-						<ul class="uk-list uk-list-bullet">
+						<h5 class="uk-card-title">Sensor: {{ sensor.sensorType|title }}</h5>
+						<h6>Relevant statistics:</h6>
+						<ul class="uk-list">
 							{% for m,v in sensor.metrics.items() %}
-								<li>{{m}}: {{v}}</li>
+								<li><b>{{m}}:</b> {{v}}</li>
 							{% endfor %}
 						</ul>
 					</div>
