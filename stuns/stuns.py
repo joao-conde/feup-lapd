@@ -12,14 +12,19 @@ from sensors.sensor import sensor
 from dispatcher import dispatcher
 from utils import get_all_direct_subfolders, get_all_files_recursively, produce_report, etree_to_dict
 
+from bson.binary import JAVA_LEGACY
+from bson.codec_options import CodecOptions
+from uuid import uuid4
+
+
 
 def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name):
     # TODO: avoid duplicate, perhaps with hash in dataset document
     with MongoClient(mongo) as client:
-        db = client[database_name]
+        db = client.get_database(database_name, CodecOptions(uuid_representation=JAVA_LEGACY))
         # create dataset instance and get Id
         c_ds = db["datasets"]
-        ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset", "name": dataset_name, "type": "Dataset", "hash": "TODO"})
+        ds_id = c_ds.insert({"_id": uuid4(), "className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset", "name": dataset_name, "type": "Dataset", "hash": "TODO"})
 
         users = defaultdict(list)
         d = dispatcher(verbose)  # create a dispatcher instance
@@ -27,14 +32,14 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         for user, uf in get_all_direct_subfolders(path):
             # create acquisition
             c_acq = db["acquisitions"]
-            acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
+            acq_id = c_acq.insert({"_id": uuid4(), "className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
             c_samples = db["samples"]
             subject = None
             for protocol, pf in get_all_direct_subfolders(uf):
                 for location, lf in get_all_direct_subfolders(pf):
                     for device_str, df in get_all_direct_subfolders(lf):
                         sensors = []
-                        dev_id = ObjectId()
+                        dev_id = uuid4()
                         for date_str, dtf in get_all_direct_subfolders(df):
                             date = datetime.strptime(date_str, '%Y-%m-%d_%H-%M-%S')
                             for file, fp in get_all_files_recursively(dtf):
@@ -48,7 +53,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
                                     sensor, datapoints = d.dispatch(file, fp, acq_id, dev_id)
                                     if len(sensor): 
                                         sensors.append(sensor)
-                                        c_samples.insert(datapoints)
+                                        c_samples.insert([{"_id": uuid4(), **datapoint} for datapoint in datapoints])
                         if len(sensors):
                             device["sensors"] = sensors
                         c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
