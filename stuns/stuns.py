@@ -47,7 +47,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
     for thread in threads:  # before producing the report, wait for workers
         thread.join()
 
-    # produce_report(dict(), users)  # TODO: include global metrics
+    produce_report(dict(), users)  # TODO: include global metrics
 
 
 def parse_info_xml(filepath, target):
