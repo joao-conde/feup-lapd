@@ -58,7 +58,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
     # TODO: make this operation parallel
 
-    # produce_report(dict(), users)  # TODO: include global metrics
+    produce_report(dict(), users)  # TODO: include global metrics
 
 
 def parse_info_xml(filepath, target):

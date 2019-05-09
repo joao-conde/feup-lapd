@@ -43,7 +43,9 @@ def produce_report(execution_metrics, users):
         loader=PackageLoader('stuns', 'templates'),
         autoescape=select_autoescape(['html', 'xml'])
     )
+    env.globals.update(zip=zip) #Dark magic from https://stackoverflow.com/questions/5208252/ziplist1-list2-in-jinja2
     template = env.get_template("report.html")
+
     with open("report.html", "w", encoding="utf-8") as out:
         out.write(template.render(
             date=datetime.date.today().strftime("%B %d, %Y"),
