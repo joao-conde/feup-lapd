@@ -22,13 +22,14 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
         ds_hash = get_dataset_hash(path)
         identical_ds_cnt = c_ds.count_documents({"hash": ds_hash})
-        
-        print("\n" + "DATASET HASH: " + ds_hash + "\n")
-        
+
         if identical_ds_cnt != 0:
-            opt = input("Same dataset being imported, wish to continue? [Y/N]  ")
-            if opt == "N" or opt == "n": return
-        
+            opt = input(
+                "Dataset " + path + " was imported " +
+                str(identical_ds_cnt) + " time(s) already."
+                + "\nDo you wish to continue and import it again? (y/n) ")
+            if opt != "Y" and opt != "y":
+                return
 
         ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset",
                              "name": dataset_name, "type": "Dataset", "hash": ds_hash})
