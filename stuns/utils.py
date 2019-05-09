@@ -3,6 +3,7 @@ import sys
 import glob
 import datetime
 import hashlib
+import zipfile
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 
@@ -50,3 +51,18 @@ def produce_report(execution_metrics, users):
             execution_metrics=execution_metrics,
             users=users
         ))
+
+
+def zip(path, zip_name):
+    ziph = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED)
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file))
+    ziph.close()
+
+def get_dataset_hash(path):
+    temp_zip_name = "temp.zip"
+    zip(path, temp_zip_name)
+    ds_hash = hash_file(temp_zip_name)
+    os.remove(temp_zip_name)
+    return ds_hash
