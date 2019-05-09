@@ -62,7 +62,7 @@ def produce_report(execution_metrics, users):
         ))
 
 
-def zip(path, zip_name):
+def zip_dataset(path, zip_name):
     ziph = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED)
     for root, dirs, files in os.walk(path):
         for file in files:
@@ -72,7 +72,7 @@ def zip(path, zip_name):
 
 def get_dataset_hash(path):
     temp_zip_name = "temp.zip"
-    zip(path, temp_zip_name)
+    zip_dataset(path, temp_zip_name)
     ds_hash = hash_file(temp_zip_name)
     os.remove(temp_zip_name)
     return ds_hash
