@@ -1,5 +1,4 @@
 import os
-import time
 from sys import argv
 import argparse
 from datetime import datetime
@@ -31,7 +30,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
             if opt != "Y" and opt != "y":
                 return
 
-        # TODO remove id if not used
+        # TODO remove ds_id (dataset_id) if it remains unused by the end of the project
         ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset",
                              "name": dataset_name, "type": "Dataset", "hash": ds_hash})
 
