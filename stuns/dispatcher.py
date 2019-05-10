@@ -18,7 +18,7 @@ class dispatcher():
         """Detects direct subclasses of the sensor class and returns them"""
         return sensor.sensor.__subclasses__()
 
-    def dispatch(self, basename, file, acq_id, dev_id, user):
+    def dispatch(self, basename, file, acq_id, dev_id, user, metrics_args):
         """given an acquisition filename, assign it to the correct sensor"""
         if basename == "description.xml":
             return {}, {}
@@ -36,7 +36,7 @@ class dispatcher():
                 else:
                     print(user_context, "Dispatcher found for %s: %s" % (basename, s))
 
-            sensor_parser = s(file)
+            sensor_parser = s(file, metrics_args)
             sensor_id = ObjectId()
             metrics, datapoints = sensor_parser.parse(acq_id, dev_id, sensor_id)
             return {"_id": sensor_id, "sensorType": s.name, "metrics": metrics}, datapoints  # sensor
