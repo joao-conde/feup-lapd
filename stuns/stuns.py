@@ -80,7 +80,7 @@ def process_user(db, users, dispatcher, user, uf, verbose):
     if verbose:
         print("Processing user: %s" % user)
 
-    c_acq = db["acquisitions"] # create acquisition
+    c_acq = db["acquisitions"]  # create acquisition
 
     acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
         datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
@@ -103,8 +103,7 @@ def process_user(db, users, dispatcher, user, uf, verbose):
                             device["type"] = "Device"
                             device["_id"] = dev_id
                         else:
-                            sensor, datapoints = dispatcher.dispatch(
-                                file, fp, acq_id, dev_id)
+                            sensor, datapoints = dispatcher.dispatch(file, fp, acq_id, dev_id, user)
                             if len(sensor):
                                 sensors.append(sensor)
                                 c_samples.insert(datapoints)
