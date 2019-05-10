@@ -109,8 +109,7 @@ def process_user(db, users, dispatcher, user, uf, verbose):
                                 c_samples.insert(datapoints)
                 if len(sensors):
                     device["sensors"] = sensors
-                c_acq.update_one({"_id": acq_id}, {
-                                 "$push": {"devices": device}})
+                c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
                 users[user] += (device, sensors)
     if subject:
         c_acq.update_one({"_id": acq_id}, {
