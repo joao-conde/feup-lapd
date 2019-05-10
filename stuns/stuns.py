@@ -36,7 +36,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         d = dispatcher(verbose)  # create a dispatcher instance
 
         for user, uf in get_all_direct_subfolders(path):
-            t = Thread(target=process_user, args=([db, users, d, user, uf]))
+            t = Thread(target=process_user, args=([db, users, d, user, uf, verbose]))
             t.start()
             threads.append(t)
 
@@ -76,10 +76,11 @@ def parse_args():
     return vars(parser.parse_args())
 
 
-def process_user(db, users, dispatcher, user, uf):
-    print("Processing user " + str(user))
+def process_user(db, users, dispatcher, user, uf, verbose):
+    if verbose:
+        print("Processing user: %s" % user)
 
-    c_acq = db["acquisitions"]     # create acquisition
+    c_acq = db["acquisitions"] # create acquisition
 
     acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
         datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
