@@ -9,8 +9,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/js/uikit.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.3/js/uikit-icons.min.js"></script>
     <style>
-        .uk-list.uk-list-bullet li {
-            margin: 0;
+
+        .uk-card-primary {
+            background-color: rgb(210, 210, 210);
+        }
+
+        .uk-card-secondary {
+            background-color: rgb(170, 170, 170);
+        }
+
+        div.uk-card-secondary, div.uk-card-primary {
+            margin: 1em 0 0 0;
         }
     </style>
 </head>
@@ -19,17 +28,26 @@
     <div class="uk-container">
         <h1>STUNS Report from {{date}}</h1>
         {% from 'user.html' import display_user %}
+        <div class="uk-card uk-card-default uk-card-body">
+            <h3><strong>Global Migration Metrics</strong></h3>
+            <ul class="uk-list">
+                {% for k,v in execution_metrics.items() %}
+                    <li><b>{{k}}:</b> {{v}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
         <ul uk-accordion class="uk-list-striped uk-margin-bottom">
-            {% for user, files in users.items() %}
+            {% for user, devices in users.items() %}
             <li>
                 <a class="uk-accordion-title" href="#">User: {{user}}</a>
-                <div class="uk-accordion-content">{{ display_user(user, files) }}</div>
+                <div class="uk-accordion-content">{{ display_user(user, devices[::2], devices[1::2]) }}</div>
             </li>
             {% endfor %}
         </ul>
     </div>
     <div class="uk-container uk-text-center uk-margin-bottom">
-        Made with ❤️ at FEUP
+        Made with ❤️ at FEUP <!-- Fake btw -->
     </div>
 </body>
 
