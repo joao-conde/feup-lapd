@@ -23,10 +23,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         identical_ds_cnt = c_ds.count_documents({"hash": ds_hash})
 
         if identical_ds_cnt != 0:
-            opt = input(
-                "Dataset " + path + " was imported " +
-                str(identical_ds_cnt) + " time(s) already."
-                + "\nDo you wish to continue and import it again? (y/n) ")
+            opt = input("Dataset %s was imported %s time(s) already.\nDo you wish to continue and import it again? (y/n) " % (path, identical_ds_cnt))
             if opt != "Y" and opt != "y":
                 return
 
