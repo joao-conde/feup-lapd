@@ -8,12 +8,13 @@ from utils import hash_file
 class sensor:
     """Abstract parent class that defines the method every sensor parser should implement"""
 
-    def __init__(self, file):
+    def __init__(self, file, metrics_args):
         assert self.__class__.filter is not None, "Each sensor should have a static value for 'filter' to identify its files"
         assert self.__class__.columns is not None, "Each sensor should have a static value for 'columns' for the csv-like data columns in the files"
         assert self.__class__.name is not None, "Each sensor should have a static value for 'name' describing the type of sensors they are applied to (sensorType in the database)"
         assert self.__class__.inercial is not None, "Each sensor should have a static boolean value for 'inercial' describing it as having x,y,z information or not"
         self.file = file
+        self.metrics_args = metrics_args
         self.df = pd.read_csv(self.file, delimiter=",", names=self.__class__.columns, header=None)
 
     def parse(self, acquisition_id, device_id, sensor_id):
@@ -40,7 +41,6 @@ class sensor:
         res = {
             "range": str(abs(ma - mi)),
             "missing": str(col.isnull().sum())
-
         }
         # describe includes: count,mean,std,min,25%,50%,75%,max
         for k, v in col.describe().iteritems():
@@ -62,5 +62,7 @@ class sensor:
 
         # global
         metrics["precision"] = self.column_metrics("precision")
+        # minimum threshold for precision
+        metrics["precision"]["below_min_precision"] = str((self.df["precision"] < self.metrics_args["min_precision"]).sum())
         
         return metrics
