@@ -63,6 +63,6 @@ class sensor:
         # global
         metrics["precision"] = self.column_metrics("precision")
         # minimum threshold for precision
-        metrics["precision"]["below_min_precision"] = str((self.df["precision"] < self.metrics_args["min_precision"]).sum())
+        metrics["precision"]["below_min_precision"] = str((self.df["precision"] < float(self.metrics_args["min_precision"])).sum())
         
         return metrics
