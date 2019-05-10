@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-
+from threading import Thread
 
 from sensors.sensor import sensor
 from dispatcher import dispatcher
@@ -17,8 +17,7 @@ from utils import get_all_direct_subfolders, get_all_files_recursively, produce_
 def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name):
     with MongoClient(mongo) as client:
         db = client[database_name]
-        # create dataset instance and get Id
-        c_ds = db["datasets"]
+        c_ds = db["datasets"]  # create dataset instance and get Id
 
         ds_hash = get_dataset_hash(path)
         identical_ds_cnt = c_ds.count_documents({"hash": ds_hash})
@@ -31,50 +30,21 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
             if opt != "Y" and opt != "y":
                 return
 
+        # TODO remove ds_id (dataset_id) if it remains unused by the end of the project
         ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset",
                              "name": dataset_name, "type": "Dataset", "hash": ds_hash})
 
+        threads = []
         users = defaultdict(list)
         d = dispatcher(verbose)  # create a dispatcher instance
 
         for user, uf in get_all_direct_subfolders(path):
-            # create acquisition
-            c_acq = db["acquisitions"]
-            acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
-                datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
-            c_samples = db["samples"]
-            subject = None
-            for protocol, pf in get_all_direct_subfolders(uf):
-                for location, lf in get_all_direct_subfolders(pf):
-                    for device_str, df in get_all_direct_subfolders(lf):
-                        sensors = []
-                        dev_id = ObjectId()
-                        for date_str, dtf in get_all_direct_subfolders(df):
-                            date = datetime.strptime(
-                                date_str, '%Y-%m-%d_%H-%M-%S')
-                            for file, fp in get_all_files_recursively(dtf):
-                                if file == "description.xml":
-                                    if not subject:
-                                        subject = parse_info_xml(fp, "user")
-                                    device = parse_info_xml(fp, "phone")
-                                    device["type"] = "Device"
-                                    device["_id"] = dev_id
-                                else:
-                                    sensor, datapoints = d.dispatch(
-                                        file, fp, acq_id, dev_id)
-                                    if len(sensor):
-                                        sensors.append(sensor)
-                                        c_samples.insert(datapoints)
-                        if len(sensors):
-                            device["sensors"] = sensors
-                        c_acq.update_one({"_id": acq_id}, {
-                                         "$push": {"devices": device}})
-                        users[user] += (device, sensors)
-            if subject:
-                c_acq.update_one({"_id": acq_id}, {
-                                 "$set": {"subject": subject}})
+            t = Thread(target=process_user, args=([db, users, d, user, uf]))
+            t.start()
+            threads.append(t)
 
-    # TODO: make this operation parallel
+    for thread in threads:  # before producing the report, wait for workers
+        thread.join()
 
     produce_report(dict(), users)  # TODO: include global metrics
 
@@ -107,6 +77,47 @@ def parse_args():
                              help='Name of the database inside the MongoDB, default is "demdata_db"', default="demdata_db")
 
     return vars(parser.parse_args())
+
+
+def process_user(db, users, dispatcher, user, uf):
+    print("Processing user " + str(user))
+
+    c_acq = db["acquisitions"]     # create acquisition
+
+    acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
+        datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
+
+    c_samples = db["samples"]
+    subject = None
+    for protocol, pf in get_all_direct_subfolders(uf):
+        for location, lf in get_all_direct_subfolders(pf):
+            for device_str, df in get_all_direct_subfolders(lf):
+                sensors = []
+                dev_id = ObjectId()
+                for date_str, dtf in get_all_direct_subfolders(df):
+                    date = datetime.strptime(
+                        date_str, '%Y-%m-%d_%H-%M-%S')
+                    for file, fp in get_all_files_recursively(dtf):
+                        if file == "description.xml":
+                            if not subject:
+                                subject = parse_info_xml(fp, "user")
+                            device = parse_info_xml(fp, "phone")
+                            device["type"] = "Device"
+                            device["_id"] = dev_id
+                        else:
+                            sensor, datapoints = dispatcher.dispatch(
+                                file, fp, acq_id, dev_id)
+                            if len(sensor):
+                                sensors.append(sensor)
+                                c_samples.insert(datapoints)
+                if len(sensors):
+                    device["sensors"] = sensors
+                c_acq.update_one({"_id": acq_id}, {
+                                 "$push": {"devices": device}})
+                users[user] += (device, sensors)
+    if subject:
+        c_acq.update_one({"_id": acq_id}, {
+                         "$set": {"subject": subject}})
 
 
 if __name__ == "__main__":
