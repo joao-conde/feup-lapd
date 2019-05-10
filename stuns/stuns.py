@@ -14,16 +14,17 @@ from dispatcher import dispatcher
 from utils import get_all_direct_subfolders, get_all_files_recursively, produce_report, etree_to_dict, get_dataset_hash
 
 
-def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name):
+def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name, metrics_args):
     with MongoClient(mongo) as client:
         db = client[database_name]
         c_ds = db["datasets"]  # create dataset instance and get Id
 
+        if verbose: print("Checking for repeated imports...")
         ds_hash = get_dataset_hash(path)
         identical_ds_cnt = c_ds.count_documents({"hash": ds_hash})
 
         if identical_ds_cnt != 0:
-            opt = input("Dataset %s was imported %s time(s) already.\nDo you wish to continue and import it again? (y/n) " % (path, identical_ds_cnt))
+            opt = input("Dataset '%s' was imported %s time(s) already.\nDo you wish to continue and import it again? (y/n) " % (path, identical_ds_cnt))
             if opt != "Y" and opt != "y":
                 return
 
@@ -36,7 +37,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         d = dispatcher(verbose)  # create a dispatcher instance
 
         for user, uf in get_all_direct_subfolders(path):
-            t = Thread(target=process_user, args=([db, users, d, user, uf, verbose]))
+            t = Thread(target=process_user, args=([db, users, d, user, uf, verbose, metrics_args]))
             t.start()
             threads.append(t)
 
@@ -72,11 +73,14 @@ def parse_args():
         '-mdb', '--mongodb', help='Path to the MongoDB instance, default is "mongodb://localhost:9090/"', default="mongodb://localhost:9090/")
     db_settings.add_argument('-dtn', '--database_name',
                              help='Name of the database inside the MongoDB, default is "demdata_db"', default="demdata_db")
+    
+    metrics_settings = parser.add_argument_group('metrics settings')
+    metrics_settings.add_argument("-mp", "--min_precision", help="The minimum acceptable value for precision, datapoints below this threshold are counted", default=0)
 
     return vars(parser.parse_args())
 
 
-def process_user(db, users, dispatcher, user, uf, verbose):
+def process_user(db, users, dispatcher, user, uf, verbose, metrics_args):
     if verbose:
         print("Processing user: %s" % user)
 
@@ -103,7 +107,7 @@ def process_user(db, users, dispatcher, user, uf, verbose):
                             device["type"] = "Device"
                             device["_id"] = dev_id
                         else:
-                            sensor, datapoints = dispatcher.dispatch(file, fp, acq_id, dev_id, user)
+                            sensor, datapoints = dispatcher.dispatch(file, fp, acq_id, dev_id, user, metrics_args)
                             if len(sensor):
                                 sensors.append(sensor)
                                 c_samples.insert(datapoints)
@@ -118,5 +122,7 @@ def process_user(db, users, dispatcher, user, uf, verbose):
 
 if __name__ == "__main__":
     args = parse_args()
-    structure_the_unstructured(
-        args["path"], args["verbose"], args["mongodb"], args["database_name"], args["dataset_name"])
+    metrics_args = {
+        "min_precision": args["min_precision"]
+    }
+    structure_the_unstructured(args["path"], args["verbose"], args["mongodb"], args["database_name"], args["dataset_name"], metrics_args)
