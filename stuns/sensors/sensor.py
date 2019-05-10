@@ -12,6 +12,7 @@ class sensor:
         assert self.__class__.filter is not None, "Each sensor should have a static value for 'filter' to identify its files"
         assert self.__class__.columns is not None, "Each sensor should have a static value for 'columns' for the csv-like data columns in the files"
         assert self.__class__.name is not None, "Each sensor should have a static value for 'name' describing the type of sensors they are applied to (sensorType in the database)"
+        assert self.__class__.inercial is not None, "Each sensor should have a static boolean value for 'inercial' describing it as having x,y,z information or not"
         self.file = file
         self.df = pd.read_csv(self.file, delimiter=",", names=self.__class__.columns, header=None)
 
@@ -37,11 +38,13 @@ class sensor:
         col = self.df[col_name]
         mi, ma = col.min(), col.max()
         res = {
-            "range": abs(ma - mi),
+            "range": str(abs(ma - mi)),
+            "missing": str(col.isnull().sum())
+
         }
         # describe includes: count,mean,std,min,25%,50%,75%,max
         for k, v in col.describe().iteritems():
-            res[k] = v
+            res[k] = str(v)
         return res
 
     def extract_metrics(self, metrics={}):
