@@ -7,6 +7,7 @@ class gyroscope(sensor):
     filter = ".*Gyroscope\.txt"
     columns = ['timestamp', 'x', 'y', 'z', 'precision']
     name = "GYROSCOPE"
+    inercial = True
 
     def __init__(self, file):
         super().__init__(file)
