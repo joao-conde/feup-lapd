@@ -58,7 +58,6 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         user, result = p.get()
         users[user]= result
 
-    print(users)
     produce_report(dict(), users)  # TODO: include global metrics
 
 
