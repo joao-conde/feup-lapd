@@ -58,8 +58,7 @@ class sensor:
     def generate_pandas_profiling(self, hash):
         filename = "report/%s.html" % hash
         if self.metrics_args["pandas_profiling"]:
-            print("Let's go bro")
-            profile = pp.ProfileReport(self.df, check_correlation=False)
+            profile = pp.ProfileReport(self.df, pool_size=1)
             profile.to_file(outputfile=filename)
         else:
             with open(filename, "w") as out:
