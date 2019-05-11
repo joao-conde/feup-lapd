@@ -2,13 +2,12 @@ import os, shutil
 from sys import argv
 import argparse
 from datetime import datetime
-from collections import defaultdict
 import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from threading import Thread
-# import multiprocessing
+import multiprocessing
 
 from sensors.sensor import sensor
 from dispatcher import dispatcher
@@ -22,7 +21,7 @@ def get_mongo_client(mongo, database_name):
     return client, db, c_ds
 
 
-def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name, pandas_profiling, metrics_args):
+def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name, metrics_args):
     # get db instace
     client, db, c_ds = get_mongo_client(mongo, database_name)
 
@@ -43,18 +42,23 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
     client.close()
 
     # Start parallel processing
+    pool = multiprocessing.Pool()
     processes = []
-    users = defaultdict(list)
     d = dispatcher(verbose)  # create a dispatcher instance
     for user, uf in get_all_direct_subfolders(path):
         # process_user(db, users, d, user, uf, verbose, metrics_args, mongo, database_name)
-        p = multiprocessing.Process(target=process_user, args=([users, d, user, uf, verbose, metrics_args, mongo, database_name, pandas_profiling]))
-        p.start()
-        processes.append(p)
+        processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
+        # p = multiprocessing.Process(target=process_user, args=([users, d, user, uf, verbose, metrics_args, mongo, database_name]))
+        # p.start()
+        # processes.append(p)
+    # final_result = [worker.get() for worker in workers]
 
+    users = {}
     for p in processes:  # before producing the report, wait for workers
-        p.join()
+        user, result = p.get()
+        users[user] = result
 
+    print(users)
     produce_report(dict(), users)  # TODO: include global metrics
 
 
@@ -70,7 +74,7 @@ def parse_info_xml(filepath, target):
     return etree_to_dict(root.find(target))
 
 
-def process_user(users, dispatcher, user, uf, verbose, metrics_args, mongo, database_name):
+def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_name):
     if verbose:
         print("Processing user: %s" % user)
 
@@ -83,6 +87,7 @@ def process_user(users, dispatcher, user, uf, verbose, metrics_args, mongo, data
 
     c_samples = db["samples"]
     subject = None
+    result = []
     for protocol, pf in get_all_direct_subfolders(uf):
         for location, lf in get_all_direct_subfolders(pf):
             for device_str, df in get_all_direct_subfolders(lf):
@@ -106,11 +111,11 @@ def process_user(users, dispatcher, user, uf, verbose, metrics_args, mongo, data
                 if len(sensors):
                     device["sensors"] = sensors
                 c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
-                users[user] += (device, sensors)
+                result.append((device, sensors))
     if subject:
-        c_acq.update_one({"_id": acq_id}, {
-                         "$set": {"subject": subject}})
+        c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
     client.close()
+    return user, result
 
 
 def parse_args():

@@ -21,7 +21,7 @@ class sensor:
     def parse(self, acquisition_id, device_id, sensor_id):
         """Main method that handles a sensor file, performs preprocessing operation, extracts metrics and imports the data into the MongoDB instance"""
         self.preprocessing_dataframe()
-        return self.extract_metrics(), self.parse_datapoints()
+        return self.extract_metrics(), self.parse_datapoints(acquisition_id, device_id, sensor_id)
 
     def parse_datapoints(self, acquisition_id, device_id, sensor_id):
         """Method that returns a list of datapoints to insert in the samples collection, this should be overriden when the sensor does not need to insert into the database"""
@@ -31,7 +31,6 @@ class sensor:
             datapoints[i]["deviceId"] = device_id
             datapoints[i]["sensorId"] = sensor_id
         return datapoints
-
 
     def preprocessing_dataframe(self):
         """This method can be extended by child classes to do things like bulk conversion of dataframe column from text to date object and other preprocessing operations done before bulk inserting into the database"""
