@@ -55,6 +55,15 @@ class sensor:
         metrics["hash"] = hash_file(self.file)
         return metrics
 
+    def generate_pandas_profiling(self, hash):
+        filename = "report/%s.html" % hash
+        if self.metrics_args["pandas_profiling"]:
+            profile = pp.ProfileReport(self.df)
+            profile.to_file(outputfile=filename)
+        else:
+            with open(filename, "w") as out:
+                out.write("To see these reports activate Pandas Profiling argument (-pp) in stuns")
+
     def extract_metrics(self, metrics={}):
         """Extract metrics specific to this datafile. Can be extended by child classes that call it for the default metrics"""
         # global file metrics
@@ -71,12 +80,6 @@ class sensor:
         # minimum threshold for precision
         metrics["precision"]["below_min_precision"] = str((self.df["precision"] < float(self.metrics_args["min_precision"])).sum())
 
-        filename = "report/%s.html" % metrics["hash"]
-        if self.metrics_args["pandas_profiling"]:
-            profile = pp.ProfileReport(self.df)
-            profile.to_file(outputfile=filename)
-        else:
-            with open(filename, "w") as out:
-                out.write("To see these reports activate Pandas Profiling argument (-pp) in stuns")
+        self.generate_pandas_profiling(metrics["hash"])
 
         return metrics
