@@ -56,7 +56,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
     users = {}
     for p in processes:  # before producing the report, wait for workers
         user, result = p.get()
-        users[user] = result
+        users[user]= result
 
     print(users)
     produce_report(dict(), users)  # TODO: include global metrics
@@ -111,7 +111,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
                 if len(sensors):
                     device["sensors"] = sensors
                 c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
-                result.append((device, sensors))
+                result+= [device, sensors]
     if subject:
         c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
     client.close()
