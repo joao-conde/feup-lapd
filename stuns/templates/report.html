@@ -42,6 +42,7 @@
             <li>
                 <a class="uk-accordion-title" href="#">User: {{user}}</a>
                 <div class="uk-accordion-content">{{ display_user(user, devices[::2], devices[1::2]) }}</div>
+                {{devices}}
             </li>
             {% endfor %}
         </ul>
