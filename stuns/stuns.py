@@ -37,27 +37,23 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
     create_report_folder()
     # TODO remove ds_id (dataset_id) if it remains unused by the end of the project
-    ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset",
-                         "name": dataset_name, "type": "Dataset", "hash": ds_hash})
+    ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset", "name": dataset_name, "type": "Dataset", "hash": ds_hash})
     client.close()
 
-    # Start parallel processing
-    pool = multiprocessing.Pool()
-    processes = []
     d = dispatcher(verbose)  # create a dispatcher instance
-    for user, uf in get_all_direct_subfolders(path):
-        # process_user(db, users, d, user, uf, verbose, metrics_args, mongo, database_name)
-        processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
-        # p = multiprocessing.Process(target=process_user, args=([users, d, user, uf, verbose, metrics_args, mongo, database_name]))
-        # p.start()
-        # processes.append(p)
-    # final_result = [worker.get() for worker in workers]
-
     users = {}
-    for p in processes:  # before producing the report, wait for workers
-        user, result = p.get()
-        users[user]= result
-
+    if metrics_args["pandas_profiling"]:  # no multiprocessing because pandas profiling does it and it cannot cascade
+        for user, uf in get_all_direct_subfolders(path):
+            users[user] = process_user(d, user, uf, verbose, metrics_args, mongo, database_name)[1]
+    else:  # start parallel processing
+        pool = multiprocessing.Pool()
+        processes = []
+        for user, uf in get_all_direct_subfolders(path):
+            processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
+        for p in processes:  # before producing the report, wait for workers
+            user, result = p.get()
+            users[user] = result
+    
     produce_report(dict(), users)  # TODO: include global metrics
 
 
@@ -110,7 +106,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
                 if len(sensors):
                     device["sensors"] = sensors
                 c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
-                result+= [device, sensors]
+                result += [device, sensors]
     if subject:
         c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
     client.close()
