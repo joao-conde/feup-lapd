@@ -3,6 +3,7 @@ import json
 import time
 from pymongo import MongoClient
 from utils import hash_file
+import pandas_profiling as pp
 
 
 class sensor:
@@ -47,12 +48,17 @@ class sensor:
             res[k] = str(v)
         return res
 
-    def extract_metrics(self, metrics={}):
-        """Extract metrics specific to this datafile. Can be extended by child classes that call it for the default metrics"""
+    def file_metrics(self, metrics={}):
         metrics["filename"] = self.file
         metrics["structured_at"] = time.time()
         metrics["rows"] = len(self.df)
         metrics["hash"] = hash_file(self.file)
+        return metrics
+
+    def extract_metrics(self, metrics={}):
+        """Extract metrics specific to this datafile. Can be extended by child classes that call it for the default metrics"""
+        # global file metrics
+        metrics = self.file_metrics(metrics)
 
         # inercial
         if self.__class__.inercial:
@@ -64,5 +70,13 @@ class sensor:
         metrics["precision"] = self.column_metrics("precision")
         # minimum threshold for precision
         metrics["precision"]["below_min_precision"] = str((self.df["precision"] < float(self.metrics_args["min_precision"])).sum())
-        
+
+        filename = "report/%s.html" % metrics["hash"]
+        if self.metrics_args["pandas_profiling"]:
+            profile = pp.ProfileReport(self.df)
+            profile.to_file(outputfile=filename)
+        else:
+            with open(filename, "w") as out:
+                out.write("To see these reports activate Pandas Profiling argument (-pp) in stuns")
+
         return metrics
