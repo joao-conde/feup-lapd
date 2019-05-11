@@ -9,7 +9,8 @@ docs/_build
 \.vscode/
 demdata-api-docker-images
 report\.html
-report/*
+report/
+
 #test data folders
 MoverGLWValidationDataset
 users
