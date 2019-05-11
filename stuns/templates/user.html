@@ -8,6 +8,7 @@
 				<li>
 					<div class="uk-card uk-card-secondary uk-card-body">
 						<h5 class="uk-card-title">Sensor: {{ sensor.sensorType|title }}</h5>
+						<strong><a style="text-decoration:underline;color:aquamarine;" href="report/{{sensor.metrics['hash']}}.html">Complete Report</a></strong>
 						<h6>Relevant statistics:</h6>
 						<ul class="uk-list">
 							{% for m,v in sensor.metrics.items() %}
