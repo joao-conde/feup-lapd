@@ -43,7 +43,7 @@ def get_acquisition_device_sensor_metrics(acquisitionId, deviceId, sensorType):
 
     return jsonify(result)
 
-@app.route('/acquisitions/<uuid:acquisitionId>/devices/<uuid:deviceId>/sensors/<string:sensorType>/metric/<string:metric>')
+@app.route('/acquisitions/<uuid:acquisitionId>/devices/<uuid:deviceId>/sensors/<string:sensorType>/metrics/<string:metric>')
 def get_acquisition_device_sensor_specific_metric(acquisitionId, deviceId, sensorType, metric):
     query = {'_id': UUIDLegacy(acquisitionId), 'devices._id': UUIDLegacy(deviceId)}
     projection = {'devices._id': 1, 'devices.$': 1}

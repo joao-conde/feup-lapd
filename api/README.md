@@ -1,4 +1,4 @@
-Some extra routes to retrieve information that extends the database's original "schema". R
+Some extra routes to retrieve information that extends the database's original "schema".
 
 ## How to run
 `docker-compose up`. Base endpoint will be localhost:5050
