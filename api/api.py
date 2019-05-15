@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from pymongo import MongoClient
 from bson.binary import JAVA_LEGACY, UUIDLegacy
 from bson.codec_options import CodecOptions
@@ -9,7 +9,7 @@ mongo_client = MongoClient(host='demdata_mongodb')
 db = mongo_client.get_database('demdata_db', CodecOptions(uuid_representation=JAVA_LEGACY))
 
 routes = [
-    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics', #For a given acquisition and device, returns all metrics for all sensors
+    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics[?metric=METRIC[&gt=MIN_VALUE][&lt=MAX_VALUE]]', #For a given acquisition and device, returns all metrics for all sensors. Optionally, filter by sensors with a specific metric, optionally bound between a specific range
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics', #For a given acquisition, device and sensor, returns all metrics
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics/METRIC' #For a given acquisition, device, sensor and metric, return the metric's value
     ]
@@ -27,7 +27,13 @@ def get_all_acquisition_device_metrics(acquisitionId, deviceId):
 
     result = {}
     if query_result is not None:
-        result['sensors'] = [{'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']} for sensor in query_result['devices'][0]['sensors']]
+        if request.args.get('metric') is not None:
+            metric = request.args.get('metric')
+            lower_bound = int(request.args.get('gt', '0'))
+            upper_bound = int(request.args.get('lt', '1000000'))
+            result['sensors'] = [{'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']} for sensor in query_result['devices'][0]['sensors'] if metric in sensor['metrics'] and sensor['metrics'][metric] >= lower_bound and sensor['metrics'][metric] <= upper_bound]
+        else:
+            result['sensors'] = [{'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']} for sensor in query_result['devices'][0]['sensors']]
 
     return jsonify(result)
 
