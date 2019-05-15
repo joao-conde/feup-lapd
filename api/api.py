@@ -10,7 +10,8 @@ db = mongo_client.get_database('demdata_db', CodecOptions(uuid_representation=JA
 
 routes = [
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics', #For a given acquisition and device, returns all metrics for all sensors
-    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics' #For a given acquisition, device and sensor, returns all metrics
+    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics', #For a given acquisition, device and sensor, returns all metrics
+    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics/METRIC' #For a given acquisition, device, sensor and metric, return the metric's value
     ]
 
 @app.route('/')
@@ -26,8 +27,6 @@ def get_all_acquisition_device_metrics(acquisitionId, deviceId):
 
     result = {}
     if query_result is not None:
-        result['_id'] = query_result['_id']
-        result['device_id'] = query_result['devices'][0]['_id']
         result['sensors'] = [{'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']} for sensor in query_result['devices'][0]['sensors']]
 
     return jsonify(result)
@@ -40,10 +39,20 @@ def get_acquisition_device_sensor_metrics(acquisitionId, deviceId, sensorType):
 
     result = {}
     if query_result is not None:
-        result['_id'] = query_result['_id']
-        result['device_id'] = query_result['devices'][0]['_id']
-        result['sensor_type'] = sensorType
         result['metrics'] = next((sensor['metrics'] for sensor in query_result['devices'][0]['sensors'] if sensor['sensorType'].title() == sensorType.title()), dict())
+
+    return jsonify(result)
+
+@app.route('/acquisitions/<uuid:acquisitionId>/devices/<uuid:deviceId>/sensors/<string:sensorType>/metric/<string:metric>')
+def get_acquisition_device_sensor_specific_metric(acquisitionId, deviceId, sensorType, metric):
+    query = {'_id': UUIDLegacy(acquisitionId), 'devices._id': UUIDLegacy(deviceId)}
+    projection = {'devices._id': 1, 'devices.$': 1}
+    query_result = db.acquisitions.find_one(query, projection)
+
+    result = {}
+    if query_result is not None:
+        metrics = next((sensor['metrics'] for sensor in query_result['devices'][0]['sensors'] if sensor['sensorType'].title() == sensorType.title()), dict())
+        result['value'] = metrics[metric] if metric.lower() in metrics else 'NOT_FOUND'
 
     return jsonify(result)
 
