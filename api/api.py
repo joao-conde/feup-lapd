@@ -11,7 +11,7 @@ db = mongo_client.get_database('demdata_db', CodecOptions(uuid_representation=JA
 routes = [
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics[?metric=METRIC[&gt=MIN_VALUE][&lt=MAX_VALUE]]', #For a given acquisition and device, returns all metrics for all sensors. Optionally, filter by sensors with a specific metric, optionally bound between a specific range
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics', #For a given acquisition, device and sensor, returns all metrics
-    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics/METRIC' #For a given acquisition, device, sensor and metric, return the metric's value
+    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics/METRIC' #For a given acquisition, device, sensor and metric, return the value of the metric
     ]
 
 @app.route('/')
