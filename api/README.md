@@ -1,6 +1,7 @@
-Some extra routes to retrieve information that extends the database's original "schema". Runs just like one of the other services, so when `docker-compose up` is run, it will start. It is available at localhost:5050
+Some extra routes to retrieve information that extends the database's original "schema". R
 
-## Endpoints (TBD)
- * `/acquisition`
- * dado aquisisiton e device -> metrics
- * ...
+## How to run
+`docker-compose up`. Base endpoint will be localhost:5050
+
+## What are the endpoints available?
+Access the root server page (localhost:5050/), which will show a list of the available routes
