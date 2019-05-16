@@ -5,7 +5,6 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from pymongo import MongoClient
-from bson.objectid import ObjectId
 from threading import Thread
 import multiprocessing
 
@@ -90,7 +89,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
         for location, lf in get_all_direct_subfolders(pf):
             for device_str, df in get_all_direct_subfolders(lf):
                 sensors = []
-                dev_id = ObjectId()
+                dev_id = uuid4()
                 for date_str, dtf in get_all_direct_subfolders(df):
                     date = datetime.strptime(
                         date_str, '%Y-%m-%d_%H-%M-%S')
