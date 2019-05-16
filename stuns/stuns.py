@@ -17,6 +17,12 @@ from bson.binary import JAVA_LEGACY
 from bson.codec_options import CodecOptions
 from uuid import uuid4
 
+def get_mongo_client(mongo, database_name):
+    client = MongoClient(mongo)
+    db = client.get_database(database_name, CodecOptions(uuid_representation=JAVA_LEGACY))
+    c_ds = db["datasets"]  # create dataset instance and get Id
+    return client, db, c_ds
+
 
 def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name, metrics_args):
     # get db instace
