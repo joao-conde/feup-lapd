@@ -3,7 +3,7 @@ import sys
 from re import search
 from tqdm import tqdm
 from datetime import datetime
-from bson.objectid import ObjectId
+from uuid import uuid4
 
 from sensors import *
 
@@ -36,7 +36,7 @@ class dispatcher():
                 else:
                     print(user_context, "Dispatcher found for %s: %s" % (basename, s))
 
+            sensor_id = uuid4()
             sensor_parser = s(file, metrics_args)
-            sensor_id = ObjectId()
             metrics, datapoints = sensor_parser.parse(acq_id, dev_id, sensor_id)
             return {"_id": sensor_id, "sensorType": s.name, "metrics": metrics}, datapoints  # sensor

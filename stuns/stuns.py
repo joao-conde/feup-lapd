@@ -5,7 +5,6 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from pymongo import MongoClient
-from bson.objectid import ObjectId
 from threading import Thread
 import multiprocessing
 
@@ -13,10 +12,13 @@ from sensors.sensor import sensor
 from dispatcher import dispatcher
 from utils import get_all_direct_subfolders, get_all_files_recursively, produce_report, etree_to_dict, get_dataset_hash
 
+from bson.binary import JAVA_LEGACY
+from bson.codec_options import CodecOptions
+from uuid import uuid4
 
 def get_mongo_client(mongo, database_name):
     client = MongoClient(mongo)
-    db = client[database_name]
+    db = client.get_database(database_name, CodecOptions(uuid_representation=JAVA_LEGACY))
     c_ds = db["datasets"]  # create dataset instance and get Id
     return client, db, c_ds
 
@@ -37,7 +39,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
     create_report_folder()
     # TODO remove ds_id (dataset_id) if it remains unused by the end of the project
-    ds_id = c_ds.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset", "name": dataset_name, "type": "Dataset", "hash": ds_hash})
+    ds_id = c_ds.insert({"_id": uuid4(), "className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset", "name": dataset_name, "type": "Dataset", "hash": ds_hash})
     client.close()
 
     d = dispatcher(verbose)  # create a dispatcher instance
@@ -77,7 +79,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
 
     c_acq = db["acquisitions"]  # create acquisition
 
-    acq_id = c_acq.insert({"className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
+    acq_id = c_acq.insert({"_id": uuid4(), "className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
         datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
 
     c_samples = db["samples"]
@@ -87,7 +89,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
         for location, lf in get_all_direct_subfolders(pf):
             for device_str, df in get_all_direct_subfolders(lf):
                 sensors = []
-                dev_id = ObjectId()
+                dev_id = uuid4()
                 for date_str, dtf in get_all_direct_subfolders(df):
                     date = datetime.strptime(
                         date_str, '%Y-%m-%d_%H-%M-%S')
@@ -103,7 +105,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
                             if len(sensor):
                                 sensors.append(sensor)
                                 if len(datapoints):
-                                    c_samples.insert(datapoints)
+                                    c_samples.insert([{"_id": uuid4(), **datapoint} for datapoint in datapoints])
                 if len(sensors):
                     device["sensors"] = sensors
                 c_acq.update_one({"_id": acq_id}, {"$push": {"devices": device}})
