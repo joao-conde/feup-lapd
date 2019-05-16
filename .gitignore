@@ -1,5 +1,6 @@
 env/
 data/
+data.1/
 .ipynb_checkpoints
 __pycache__
 htmlcov
@@ -7,5 +8,9 @@ htmlcov
 docs/_build
 \.vscode/
 demdata-api-docker-images
-MoverGLWValidationDataset
 report\.html
+report/
+
+#test data folders
+MoverGLWValidationDataset
+users

@@ -6,11 +6,10 @@ import json
 class accelerometer(sensor):
     """Sensor for accelerometer data, structure is `timestamp, x, y, z, precision`"""
     filter = ".*Accelerometer\.txt"
-    columns = ['timestamp', 'x,', 'y,', 'z,', 'precision']
+    columns = ['timestamp', 'x', 'y', 'z', 'precision']
     name = "ACCELEROMETER"
+    inercial = True
 
-    def __init__(self, file):
-        super().__init__(file)
+    def __init__(self, file, metrics_args):
+        super().__init__(file, metrics_args)
 
-    # def preprocessing_dataframe(self):
-    #     self.df["timestamp"] = pd.to_datetime(self.df["timestamp"], unit="ms")
