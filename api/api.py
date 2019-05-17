@@ -9,7 +9,7 @@ mongo_client = MongoClient(host='demdata_mongodb')
 db = mongo_client.get_database('demdata_db', CodecOptions(uuid_representation=JAVA_LEGACY))
 
 routes = [
-    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics[?metric=METRIC[&gt=MIN_VALUE][&lt=MAX_VALUE]]', #For a given acquisition and device, returns all metrics for all sensors. Optionally, filter by sensors with a specific metric, optionally bound between a specific range
+    '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics[?metric=METRIC[&gt=MIN_VALUE|&gte=MIN_VALUE][&lt=MAX_VALUE|&lte=MAX_VALUE]]', #For a given acquisition and device, returns all metrics for all sensors. Optionally, filter by sensors with a specific metric, optionally bound between a specific range
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics', #For a given acquisition, device and sensor, returns all metrics
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics/METRIC' #For a given acquisition, device, sensor and metric, return the value of the metric
     ]
@@ -17,6 +17,34 @@ routes = [
 @app.route('/')
 def hello_world():
     return jsonify(routes)
+
+
+# Obtains a nested property from a document, given a list of successive keys
+def get_nested_metric(metrics, metric_nested):
+    try:
+        metric = metrics[metric_nested[0]]
+        for component in metric_nested[1::]:
+            metric = metric[component]         
+        return float(metric)
+    except KeyError:
+        return None
+
+# Checks if a given number if within a specific range. Lt has preference over lte (same applies to gt/gte)
+def is_value_within_limits(value, lt, lte, gt, gte):
+    if lt is not None:
+        if value >= float(lt):
+            return False
+    elif lte is not None:
+        if value > float(lte):
+            return False
+    if gt is not None:
+        if value <= float(gt):
+            return False
+    elif gte is not None:
+        if value < float(gte):
+            return False
+    
+    return True
            
 
 @app.route('/acquisitions/<uuid:acquisitionId>/devices/<uuid:deviceId>/metrics')
@@ -28,10 +56,12 @@ def get_all_acquisition_device_metrics(acquisitionId, deviceId):
     result = {}
     if query_result is not None:
         if request.args.get('metric') is not None:
-            metric = request.args.get('metric')
-            lower_bound = int(request.args.get('gt', '0'))
-            upper_bound = int(request.args.get('lt', '1000000'))
-            result['sensors'] = [{'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']} for sensor in query_result['devices'][0]['sensors'] if metric in sensor['metrics'] and sensor['metrics'][metric] >= lower_bound and sensor['metrics'][metric] <= upper_bound]
+            metric_nested = request.args.get('metric').split('.')
+            gte = request.args.get('gte', None)
+            gt = request.args.get('gt', None)
+            lte = request.args.get('lte', None)
+            lt = request.args.get('lt', None)
+            result['sensors'] = [{'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']} for sensor in query_result['devices'][0]['sensors'] if get_nested_metric(sensor['metrics'], metric_nested) is not None and is_value_within_limits(float(get_nested_metric(sensor['metrics'], metric_nested)), lt, lte, gt, gte)]
         else:
             result['sensors'] = [{'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']} for sensor in query_result['devices'][0]['sensors']]
 
