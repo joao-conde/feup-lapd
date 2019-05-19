@@ -24,7 +24,7 @@ def get_nested_metric(metrics, metric_nested):
     try:
         metric = metrics[metric_nested[0]]
         for component in metric_nested[1::]:
-            metric = metric[component]         
+            metric = metric[component.lower()]         
         return float(metric)
     except KeyError:
         return None
@@ -88,7 +88,8 @@ def get_acquisition_device_sensor_specific_metric(acquisitionId, deviceId, senso
     result = {}
     if query_result is not None:
         metrics = next((sensor['metrics'] for sensor in query_result['devices'][0]['sensors'] if sensor['sensorType'].title() == sensorType.title()), dict())
-        result['value'] = metrics[metric] if metric.lower() in metrics else 'NOT_FOUND'
+        value = get_nested_metric(metrics, metric.split('.'))
+        result['value'] = value if value is not None else 'NOT_FOUND'
 
     return jsonify(result)
 
