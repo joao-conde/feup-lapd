@@ -29,13 +29,20 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
     if verbose:
         print("Checking for repeated imports...")
+        
     ds_hash = get_dataset_hash(path)
     identical_ds_cnt = c_ds.count_documents({"hash": ds_hash})
 
     if identical_ds_cnt != 0:
-        opt = input("Dataset '%s' was imported %s time(s) already.\nDo you wish to continue and import it again? (y/n) " % (path, identical_ds_cnt))
-        if opt != "Y" and opt != "y":
-            return
+        opt = input("\nDataset '%s' was imported %s time(s) already.\nDo you wish to continue and import it again? (y/n) " % (path, identical_ds_cnt))
+        while True:
+            if opt == "Y" or opt == "y": 
+                print("\nProceeding with import...\n")
+                break
+            if opt == "N" or opt == "n": 
+                print("\nAborting import...\n")
+                return    
+            opt = input("\nInvalid option. Options are:\n\t- Confirm dataset import - [Y/y]\n\t- Cancel dataset import - [N/n]\nOption: ")
 
     create_report_folder()
     # TODO remove ds_id (dataset_id) if it remains unused by the end of the project
