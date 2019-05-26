@@ -62,18 +62,21 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
     for p in processes:  # before producing the report, wait for workers
         user, result, subject = p.get()
         users[user] = result
-        global_metrics['total_subjects'] = global_metrics.get('total_subjects', 0) + 1
-        global_metrics['male_subjects'] = global_metrics.get('male_subjects', 0) + 1 if subject.get('gender', None) == 'Male' else 0
-        global_metrics['female_subjects'] = global_metrics.get('total_subjects', 0) + 1 if subject.get('gender', None) == 'Female' else 0
-        global_metrics['max_age'] = max(global_metrics.get('max_age', 0), float(subject.get('age', 0)))
-        global_metrics['min_age'] = min(global_metrics.get('min_age', 0), float(subject.get('age', 0)))
-        global_metrics['avg_age'] = (global_metrics.get('avg_age', 0) * len(processes) + float(subject.get('age', 0))) / len(processes)
-        global_metrics['max_height'] = max(global_metrics.get('max_height', 0), float(subject.get('height', 0)))
-        global_metrics['min_height'] = min(global_metrics.get('min_height', 0), float(subject.get('height', 0)))
-        global_metrics['avg_height'] = (global_metrics.get('avg_height', 0) * len(processes) + float(subject.get('height', 0))) / len(processes)
+        update_global_migration_metrics(global_metrics, subject, len(processes))
 
     produce_report(global_metrics, users)
 
+
+def update_global_migration_metrics(global_metrics, subject, length):
+    global_metrics['total_subjects'] = global_metrics.get('total_subjects', 0) + 1
+    global_metrics['male_subjects'] = global_metrics.get('male_subjects', 0) + 1 if subject.get('gender', None) == 'Male' else 0
+    global_metrics['female_subjects'] = global_metrics.get('total_subjects', 0) + 1 if subject.get('gender', None) == 'Female' else 0
+    global_metrics['max_age'] = max(global_metrics.get('max_age', 0), float(subject.get('age', 0)))
+    global_metrics['min_age'] = min(global_metrics.get('min_age', 1000000), float(subject.get('age', 1000000)))
+    global_metrics['avg_age'] = (global_metrics.get('avg_age', 0) * length + float(subject.get('age', 0))) / length
+    global_metrics['max_height'] = max(global_metrics.get('max_height', 0), float(subject.get('height', 0)))
+    global_metrics['min_height'] = min(global_metrics.get('min_height', 1000000), float(subject.get('height', 1000000)))
+    global_metrics['avg_height'] = (global_metrics.get('avg_height', 0) * length + float(subject.get('height', 0))) / length
 
 def create_report_folder(report_folder="report"):
     if os.path.exists(report_folder):
