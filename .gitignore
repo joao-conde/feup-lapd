@@ -8,6 +8,7 @@ docs/_build
 demdata-api-docker-images
 report\.html
 report/
+temp.py
 
 #test data folders
 MoverGLWValidationDataset
@@ -15,4 +16,3 @@ users
 data/
 data.1/
 data_all/
-report/
