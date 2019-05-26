@@ -53,16 +53,26 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
     d = dispatcher(verbose)  # create a dispatcher instance
     users = {}
+    global_metrics = {}
     # multiprocessing
     pool = multiprocessing.Pool()
     processes = []
     for user, uf in get_all_direct_subfolders(path):
         processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
     for p in processes:  # before producing the report, wait for workers
-        user, result = p.get()
+        user, result, subject = p.get()
         users[user] = result
+        global_metrics['total_subjects'] = global_metrics.get('total_subjects', 0) + 1
+        global_metrics['male_subjects'] = global_metrics.get('male_subjects', 0) + 1 if subject.get('gender', None) == 'Male' else 0
+        global_metrics['female_subjects'] = global_metrics.get('total_subjects', 0) + 1 if subject.get('gender', None) == 'Female' else 0
+        global_metrics['max_age'] = max(global_metrics.get('max_age', 0), float(subject.get('age', 0)))
+        global_metrics['min_age'] = min(global_metrics.get('min_age', 0), float(subject.get('age', 0)))
+        global_metrics['avg_age'] = (global_metrics.get('avg_age', 0) * len(processes) + float(subject.get('age', 0))) / len(processes)
+        global_metrics['max_height'] = max(global_metrics.get('max_height', 0), float(subject.get('height', 0)))
+        global_metrics['min_height'] = min(global_metrics.get('min_height', 0), float(subject.get('height', 0)))
+        global_metrics['avg_height'] = (global_metrics.get('avg_height', 0) * len(processes) + float(subject.get('height', 0))) / len(processes)
 
-    produce_report(dict(), users)  # TODO: include global metrics
+    produce_report(global_metrics, users)
 
 
 def create_report_folder(report_folder="report"):
@@ -119,7 +129,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
     if subject:
         c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
     client.close()
-    return user, result
+    return user, result, subject
 
 
 def parse_args():
