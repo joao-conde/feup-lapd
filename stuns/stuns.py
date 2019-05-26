@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from pymongo import MongoClient
 from threading import Thread
 import multiprocessing
+import time
 
 from sensors.sensor import sensor
 from dispatcher import dispatcher
@@ -26,6 +27,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
     # get db instace
     client, db, c_ds = get_mongo_client(mongo, database_name)
 
+    migration_time = -time.process_time()
     if verbose: print("Calculating Dataset hash")
     ds_hash = get_dataset_hash(path)
 
@@ -63,6 +65,9 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         user, result, subject = p.get()
         users[user] = result
         update_global_migration_metrics(global_metrics, subject, len(processes))
+    
+    migration_time = migration_time + time.process_time()
+    global_metrics['migration_time'] = migration_time
 
     produce_report(global_metrics, users)
 
