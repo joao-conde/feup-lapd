@@ -1,6 +1,4 @@
 env/
-data/
-data.1/
 .ipynb_checkpoints
 __pycache__
 htmlcov
@@ -14,6 +12,7 @@ report/
 #test data folders
 MoverGLWValidationDataset
 users
+data/
 data.1/
 data_all/
 report/
