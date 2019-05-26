@@ -92,6 +92,8 @@ class sensor:
 
         # ensure ascending timestamps
         metrics["descending_timestamps"] = self.descending_timestamps()
+        # ensure non-negative timestamps
+        metrics["negative_timestamps"] = str(self.df[self.df["timestamp"].astype(int) < 0].values.tolist())
 
         self.generate_pandas_profiling(metrics["hash"])
 
