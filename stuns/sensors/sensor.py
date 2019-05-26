@@ -36,8 +36,8 @@ class sensor:
         """This method can be extended by child classes to do things like bulk conversion of dataframe column from text to date object and other preprocessing operations done before bulk inserting into the database"""
         pass
 
-    def column_metrics(self, col_name):
-        col = self.df[col_name]
+    def column_metrics(self, col_name=None, col=None):
+        if col_name: col = self.df[col_name]
         mi, ma = col.min(), col.max()
         res = {
             "range": str(abs(ma - mi)),
@@ -64,6 +64,15 @@ class sensor:
             with open(filename, "w") as out:
                 out.write("To see these reports activate Pandas Profiling argument (-pp) in stuns")
 
+    def descending_timestamps(self):
+        """Returns a list of (index, value) of timestamps that are not in ascending order"""
+        errors = []
+        tp = 0
+        for i, t in enumerate(self.df["timestamp"].tolist()):
+            if t < tp: errors.append((i, t))
+            tp = t
+        return str(errors)
+
     def extract_metrics(self, metrics={}):
         """Extract metrics specific to this datafile. Can be extended by child classes that call it for the default metrics"""
         # global file metrics
@@ -77,8 +86,19 @@ class sensor:
 
         # global
         metrics["precision"] = self.column_metrics("precision")
+
         # minimum threshold for precision
         metrics["precision"]["below_min_precision"] = str((self.df["precision"] < float(self.metrics_args["min_precision"])).sum())
+
+        # ensure ascending timestamps
+        metrics["descending_timestamps"] = self.descending_timestamps()
+        # ensure non-negative timestamps
+        metrics["negative_timestamps"] = str(self.df[self.df["timestamp"].astype(int) < 0].values.tolist())
+        # sampling frequency
+        timestamp_unit = 10**self.metrics_args["timestamp_diff_to_second"]
+        timestamps_col = self.df["timestamp"].astype(int)//timestamp_unit
+        metrics["timestamps"] = self.column_metrics(col=timestamps_col)
+        metrics["timestamps"]["sampling_frequency"] = str(timestamps_col.value_counts().mean()) + "HZ"
 
         self.generate_pandas_profiling(metrics["hash"])
 

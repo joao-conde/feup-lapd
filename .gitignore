@@ -9,6 +9,7 @@ demdata-api-docker-images
 report\.html
 report/
 temp.py
+temp.zip
 
 #test data folders
 MoverGLWValidationDataset

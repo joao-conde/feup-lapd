@@ -3,7 +3,6 @@ from sys import argv
 import argparse
 from datetime import datetime
 import xml.etree.ElementTree as ET
-from tqdm import tqdm
 from pymongo import MongoClient
 from threading import Thread
 import multiprocessing
@@ -23,26 +22,29 @@ def get_mongo_client(mongo, database_name):
     return client, db, c_ds
 
 
-def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name, metrics_args):
+def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name, skip_duplicate, metrics_args):
     # get db instace
     client, db, c_ds = get_mongo_client(mongo, database_name)
 
-    if verbose:
-        print("Checking for repeated imports...")
-        
+    if verbose: print("Calculating Dataset hash")
     ds_hash = get_dataset_hash(path)
-    identical_ds_cnt = c_ds.count_documents({"hash": ds_hash})
 
-    if identical_ds_cnt != 0:
-        opt = input("\nDataset '%s' was imported %s time(s) already.\nDo you wish to continue and import it again? (y/n) " % (path, identical_ds_cnt))
-        while True:
-            if opt == "Y" or opt == "y": 
-                print("\nProceeding with import...\n")
-                break
-            if opt == "N" or opt == "n": 
-                print("\nAborting import...\n")
-                return    
-            opt = input("\nInvalid option. Options are:\n\t- Confirm dataset import - [Y/y]\n\t- Cancel dataset import - [N/n]\nOption: ")
+    if not skip_duplicate: 
+        if verbose:
+            print("Checking for repeated imports...")
+            
+        identical_ds_cnt = c_ds.count_documents({"hash": ds_hash})
+
+        if identical_ds_cnt != 0:
+            opt = input("\nDataset '%s' was imported %s time(s) already.\nDo you wish to continue and import it again? (y/n) " % (path, identical_ds_cnt))
+            while True:
+                if opt == "Y" or opt == "y": 
+                    print("\nProceeding with import...\n")
+                    break
+                if opt == "N" or opt == "n": 
+                    print("\nAborting import...\n")
+                    return    
+                opt = input("\nInvalid option. Options are:\n\t- Confirm dataset import - [Y/y]\n\t- Cancel dataset import - [N/n]\nOption: ")
 
     create_report_folder()
     # TODO remove ds_id (dataset_id) if it remains unused by the end of the project
@@ -51,17 +53,14 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
     d = dispatcher(verbose)  # create a dispatcher instance
     users = {}
-    if metrics_args["pandas_profiling"]:  # no multiprocessing because pandas profiling does it and it cannot cascade
-        for user, uf in get_all_direct_subfolders(path):
-            users[user] = process_user(d, user, uf, verbose, metrics_args, mongo, database_name)[1]
-    else:  # start parallel processing
-        pool = multiprocessing.Pool()
-        processes = []
-        for user, uf in get_all_direct_subfolders(path):
-            processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
-        for p in processes:  # before producing the report, wait for workers
-            user, result = p.get()
-            users[user] = result
+    # multiprocessing
+    pool = multiprocessing.Pool()
+    processes = []
+    for user, uf in get_all_direct_subfolders(path):
+        processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
+    for p in processes:  # before producing the report, wait for workers
+        user, result = p.get()
+        users[user] = result
 
     produce_report(dict(), users)  # TODO: include global metrics
 
@@ -133,6 +132,7 @@ def parse_args():
     group_settings = parser.add_argument_group('global settings')
     group_settings.add_argument('-p', '--path', help='The source folder where the user folder are contained', required=True)
     group_settings.add_argument('-dsn', '--dataset_name', help='Name of the dataset being processed, default is "Unnamed Dataset"', default="Unnamed Dataset")
+    group_settings.add_argument('-sd', '--skip_duplicate', help='If used there won\'t be a check for duplicate dataset insertion', default=False, action="store_true")
     group_settings.add_argument('-v', '--verbose', help='Activate verbose execution', default=False, action="store_true")
 
     db_settings = parser.add_argument_group('database settings')
@@ -143,6 +143,7 @@ def parse_args():
 
     metrics_settings = parser.add_argument_group('metrics settings')
     metrics_settings.add_argument("-mp", "--min_precision", help="The minimum acceptable value for precision, datapoints below this threshold are counted", default=0)
+    metrics_settings.add_argument("-td", "--timestamp_diff_to_second", help="What is the magnitude of seconds in the timestamp values, eg: 3 means that the 3rd digit from the right is the seconds digit. This is used for the sample frequency calculation.", default=8)
     metrics_settings.add_argument('-pp', '--pandas_profiling', help='User pandas profiling (requires `sudo apt-get install python3-tk`) and may crash on some machines, but yields more informative html reports', default=False, action="store_true")
 
     return vars(parser.parse_args())
@@ -152,6 +153,7 @@ if __name__ == "__main__":
     args = parse_args()
     metrics_args = {
         "min_precision": args["min_precision"],
-        "pandas_profiling": args["pandas_profiling"]
+        "pandas_profiling": args["pandas_profiling"],
+        "timestamp_diff_to_second": args["timestamp_diff_to_second"]
     }
-    structure_the_unstructured(args["path"], args["verbose"], args["mongodb"], args["database_name"], args["dataset_name"], metrics_args)
+    structure_the_unstructured(args["path"], args["verbose"], args["mongodb"], args["database_name"], args["dataset_name"], args["skip_duplicate"], metrics_args)

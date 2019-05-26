@@ -1,13 +1,12 @@
 from .sensor import sensor
 import pandas as pd
-import json
 
 
-class accelerometer(sensor):
-    """Sensor for accelerometer data, structure is `timestamp, x, y, z, precision`"""
-    filter = ".*Accelerometer\.txt"
+class magnetometer(sensor):
+    """Sensor for magnetometer data, structure is `timestamp, x, y, z, precision`"""
+    filter = ".*Magnetometer\.txt"
     columns = ['timestamp', 'x', 'y', 'z', 'precision']
-    name = "ACCELEROMETER"
+    name = "MAGNETOMETER"
     inercial = True
 
     def __init__(self, file, metrics_args):

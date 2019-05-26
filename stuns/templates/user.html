@@ -13,7 +13,14 @@
 							<h6>Relevant statistics:</h6>
 							<ul class="uk-list">
 								{% for m,v in sensor.metrics.items() %}
-									<li><b>{{m}}:</b> {{v}}</li>
+									<li>
+										{% if m in ["x", "y", "z"] %}
+											<b style="color:coral" uk-tooltip="title: Axis metrics;pos: left">{{m}}:</b>
+										{% else %}
+											<b>{{m}}:</b>
+										{% endif %}
+										{{v}}
+									</li>
 								{% endfor %}
 							</ul>
 						</div>

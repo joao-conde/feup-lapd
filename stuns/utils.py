@@ -16,9 +16,7 @@ def get_all_direct_subfolders(root_dir):
 
 def get_all_files_recursively(root_dir):
     """returns a generator of all the files inside the given root_dir, recursively"""
-    # TODO: maybe filter for .txt only or to ignore xml
-    def filename(f): return os.path.normpath(f).split(
-        os.sep)[-1], f  # returns filename without path, path
+    def filename(f): return os.path.normpath(f).split(os.sep)[-1], f  # returns filename without path, path
     return map(filename, filter(os.path.isfile, glob.iglob(root_dir + '**/**', recursive=True)))
 
 
