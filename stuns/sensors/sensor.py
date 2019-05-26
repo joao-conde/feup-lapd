@@ -36,8 +36,8 @@ class sensor:
         """This method can be extended by child classes to do things like bulk conversion of dataframe column from text to date object and other preprocessing operations done before bulk inserting into the database"""
         pass
 
-    def column_metrics(self, col_name):
-        col = self.df[col_name]
+    def column_metrics(self, col_name=None, col=None):
+        if col_name: col = self.df[col_name]
         mi, ma = col.min(), col.max()
         res = {
             "range": str(abs(ma - mi)),
@@ -96,7 +96,9 @@ class sensor:
         metrics["negative_timestamps"] = str(self.df[self.df["timestamp"].astype(int) < 0].values.tolist())
         # sampling frequency
         timestamp_unit = 10**self.metrics_args["timestamp_diff_to_second"]
-        metrics["sampling_frequency"] = str((self.df["timestamp"].astype(int)//timestamp_unit).value_counts().mean()) + "HZ"
+        timestamps_col = self.df["timestamp"].astype(int)//timestamp_unit
+        metrics["timestamps"] = self.column_metrics(col=timestamps_col)
+        metrics["timestamps"]["sampling_frequency"] = str(timestamps_col.value_counts().mean()) + "HZ"
 
         self.generate_pandas_profiling(metrics["hash"])
 
