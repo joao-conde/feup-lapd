@@ -10,11 +10,6 @@ class accelerometer(sensor):
     name = "ACCELEROMETER"
     inercial = True
 
-    def __init__(self, file):
-        super().__init__(file)
-
-    def extract_metrics(self, metrics={}):
-        metrics = super().extract_metrics(metrics)
-        
-        return metrics
+    def __init__(self, file, metrics_args):
+        super().__init__(file, metrics_args)
 

@@ -5,6 +5,9 @@ Repository to host the LAPD project
  * [D1 slides on google slides](https://docs.google.com/presentation/d/1NvJW_P9WwHBwbEacZ1J-pC1pkdlGDi9zphYnHp0PHlc/edit)
  * [frauhnofer drive with some initial files](https://foldr.fraunhofer.pt/public/KREZM/browse)
 
+## Setup
+* `sudo apt-get install python3-tk`
+
 ## Entregas
 1. 14.03.2019 Delivery and Presentation: Project proposal
 2. 04.04.2019 Delivery and Presentation: Architecture and prototype
