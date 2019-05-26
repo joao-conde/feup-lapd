@@ -143,6 +143,7 @@ def parse_args():
 
     metrics_settings = parser.add_argument_group('metrics settings')
     metrics_settings.add_argument("-mp", "--min_precision", help="The minimum acceptable value for precision, datapoints below this threshold are counted", default=0)
+    metrics_settings.add_argument("-td", "--timestamp_diff_to_second", help="What is the magnitude of seconds in the timestamp values, eg: 3 means that the 3rd digit from the right is the seconds digit. This is used for the sample frequency calculation.", default=8)
     metrics_settings.add_argument('-pp', '--pandas_profiling', help='User pandas profiling (requires `sudo apt-get install python3-tk`) and may crash on some machines, but yields more informative html reports', default=False, action="store_true")
 
     return vars(parser.parse_args())
@@ -152,6 +153,7 @@ if __name__ == "__main__":
     args = parse_args()
     metrics_args = {
         "min_precision": args["min_precision"],
-        "pandas_profiling": args["pandas_profiling"]
+        "pandas_profiling": args["pandas_profiling"],
+        "timestamp_diff_to_second": args["timestamp_diff_to_second"]
     }
     structure_the_unstructured(args["path"], args["verbose"], args["mongodb"], args["database_name"], args["dataset_name"], metrics_args)

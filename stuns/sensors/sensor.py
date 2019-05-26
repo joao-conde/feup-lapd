@@ -94,6 +94,9 @@ class sensor:
         metrics["descending_timestamps"] = self.descending_timestamps()
         # ensure non-negative timestamps
         metrics["negative_timestamps"] = str(self.df[self.df["timestamp"].astype(int) < 0].values.tolist())
+        # sampling frequency
+        timestamp_unit = 10**self.metrics_args["timestamp_diff_to_second"]
+        metrics["sampling_frequency"] = str((self.df["timestamp"].astype(int)//timestamp_unit).value_counts().mean()) + "HZ"
 
         self.generate_pandas_profiling(metrics["hash"])
 
