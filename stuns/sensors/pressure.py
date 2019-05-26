@@ -3,7 +3,7 @@ import pandas as pd
 
 
 class pressure(sensor):
-    """Sensor for pressure data, structure is `timestamp, x, y, z, precision`"""
+    """Sensor for pressure data, structure is `timestamp, pressure, precision`"""
     filter = ".*Pressure\.txt"
     columns = ['timestamp', 'pressure', 'precision']
     name = "PRESSURE"
