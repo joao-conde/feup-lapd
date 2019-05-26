@@ -3,7 +3,6 @@ from sys import argv
 import argparse
 from datetime import datetime
 import xml.etree.ElementTree as ET
-from tqdm import tqdm
 from pymongo import MongoClient
 from threading import Thread
 import multiprocessing
