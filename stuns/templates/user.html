@@ -11,7 +11,7 @@
 							<h5 class="uk-card-title">Sensor: {{ sensor.sensorType|title }}</h5>
 							<strong><a style="text-decoration:underline;color:aquamarine;" href="report/{{sensor.metrics['hash']}}.html">Complete Report</a></strong>
 							<h6>Relevant statistics:</h6>
-							<ul class="uk-list">
+							<ul class="uk-list metric-list">
 								{% for m,v in sensor.metrics.items() %}
 									<li>
 										{% if m in ["x", "y", "z"] %}
