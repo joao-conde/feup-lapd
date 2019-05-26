@@ -12,3 +12,6 @@ report\.html
 #test data folders
 MoverGLWValidationDataset
 users
+data.1/
+data_all/
+report/
