@@ -64,6 +64,15 @@ class sensor:
             with open(filename, "w") as out:
                 out.write("To see these reports activate Pandas Profiling argument (-pp) in stuns")
 
+    def descending_timestamps(self):
+        """Returns a list of (index, value) of timestamps that are not in ascending order"""
+        errors = []
+        tp = 0
+        for i, t in enumerate(self.df["timestamp"].tolist()):
+            if t < tp: errors.append((i, t))
+            tp = t
+        return str(errors)
+
     def extract_metrics(self, metrics={}):
         """Extract metrics specific to this datafile. Can be extended by child classes that call it for the default metrics"""
         # global file metrics
@@ -77,8 +86,12 @@ class sensor:
 
         # global
         metrics["precision"] = self.column_metrics("precision")
+
         # minimum threshold for precision
         metrics["precision"]["below_min_precision"] = str((self.df["precision"] < float(self.metrics_args["min_precision"])).sum())
+
+        # ensure ascending timestamps
+        metrics["descending_timestamps"] = self.descending_timestamps()
 
         self.generate_pandas_profiling(metrics["hash"])
 
