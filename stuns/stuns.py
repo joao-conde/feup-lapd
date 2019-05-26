@@ -16,6 +16,7 @@ from bson.codec_options import CodecOptions
 from uuid import uuid4
 
 def get_mongo_client(mongo, database_name):
+    """returns a mongo client, a database instance and a dataset handler"""
     client = MongoClient(mongo)
     db = client.get_database(database_name, CodecOptions(uuid_representation=JAVA_LEGACY))
     c_ds = db["datasets"]  # create dataset instance and get Id
@@ -23,7 +24,8 @@ def get_mongo_client(mongo, database_name):
 
 
 def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name, skip_duplicate, metrics_args):
-    # get db instace
+    """main project function, migrates desired datasets into the mongoDB database and produces adequate reports"""
+    # get db instance
     client, db, c_ds = get_mongo_client(mongo, database_name)
 
     if verbose: print("Calculating Dataset hash")
@@ -66,18 +68,20 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
 
 def create_report_folder(report_folder="report"):
+    """creates a folder to contain final reports"""
     if os.path.exists(report_folder):
         shutil.rmtree(report_folder)
     os.mkdir(report_folder)  # for the helper html files
 
 
 def parse_info_xml(filepath, target):
-    """return a dict from xml of a given target"""
+    """returns a dict from xml of a given target"""
     root = ET.parse(filepath).getroot()
     return etree_to_dict(root.find(target))
 
 
 def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_name):
+    """processes user information from each sensor"""
     if verbose:
         print("Processing user: %s" % user)
 

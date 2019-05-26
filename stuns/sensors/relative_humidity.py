@@ -14,6 +14,9 @@ class relative_humidity(sensor):
 
     
     def extract_metrics(self, metrics={}):
+        """Extracts metrics for the relative_humidity sensor
+        Appends the metrics to metrics dict with key "humidity" and returns it
+        """
         metrics = super().extract_metrics(metrics)
         metrics["humidity"] = self.column_metrics("humidity")
         return metrics
