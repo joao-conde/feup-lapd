@@ -5,7 +5,7 @@ import pandas as pd
 class relative_humidity(sensor):
     """Sensor for relative_humidity data, structure is `timestamp, humidity, precision`"""
     filter = ".*RelativeHumidity\.txt"
-    columns = ['timestamp', 'relative_humidity', 'precision']
+    columns = ['timestamp', 'humidity', 'precision']
     name = "RELATIVE_HUMIDITY"
     inercial = False
 
