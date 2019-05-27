@@ -73,6 +73,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
 
 def update_global_migration_metrics(global_metrics, subject, length):
+    """Updates the global metrics dictionary with information from a new subject"""
     global_metrics['total_subjects'] = global_metrics.get('total_subjects', 0) + 1
     global_metrics['male_subjects'] = global_metrics.get('male_subjects', 0) + 1 if subject.get('gender', None) == 'Male' else 0
     global_metrics['female_subjects'] = global_metrics.get('total_subjects', 0) + 1 if subject.get('gender', None) == 'Female' else 0
