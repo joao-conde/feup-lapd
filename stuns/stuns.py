@@ -49,7 +49,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
                 opt = input("\nInvalid option. Options are:\n\t- Confirm dataset import - [Y/y]\n\t- Cancel dataset import - [N/n]\nOption: ")
 
     create_report_folder()
-    # TODO remove ds_id (dataset_id) if it remains unused by the end of the project
+   
     ds_id = c_ds.insert({"_id": uuid4(), "className": "pt.fraunhofer.demdatarepository.model.dataset.Dataset", "name": dataset_name, "type": "Dataset", "hash": ds_hash})
     client.close()
 
@@ -59,7 +59,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
     pool = multiprocessing.Pool()
     processes = []
     for user, uf in get_all_direct_subfolders(path):
-        processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
+        processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name, ds_id])))
     for p in processes:  # before producing the report, wait for workers
         user, result = p.get()
         users[user] = result
@@ -80,7 +80,7 @@ def parse_info_xml(filepath, target):
     return etree_to_dict(root.find(target))
 
 
-def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_name):
+def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_name, dataset_id):
     """processes user information from each sensor"""
     if verbose:
         print("Processing user: %s" % user)
@@ -89,7 +89,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
 
     c_acq = db["acquisitions"]  # create acquisition
 
-    acq_id = c_acq.insert({"_id": uuid4(), "className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
+    acq_id = c_acq.insert({"_id": uuid4(), "datasetId": dataset_id, "className": "pt.fraunhofer.demdatarepository.model.dataset.Acquisition", "creationTimestamp": int(
         datetime.now().timestamp()), "timeUnit": "SECONDS", "type": "Acquisition"})
 
     c_samples = db["samples"]
