@@ -3,7 +3,7 @@
 	<div class="uk-card uk-card-primary uk-card-body">
 		<h4 class="uk-card-title">Device: {{ device.model }}</h4>
 		<ul class="uk-list uk-list-divider">
-		{% if sensor_arr|length > 0 %}
+		{% if sensor_arr|length > 1 %}
 			{% for sensor in sensor_arr %}
 				{% if sensor.sensorType|title != 'All' %}
 					<li>
@@ -29,7 +29,7 @@
 				{% endif %}
 			{% endfor %}
 		{% else %}
-			<h5>No sensors found for this device.</h5>
+			<h5 style="color: black;">No sensors found for this device.</h5>
 		{% endif %}
 		</ul>
 		<br>
