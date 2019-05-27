@@ -63,7 +63,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
         processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
     for p in processes:  # before producing the report, wait for workers
         user, result, subject = p.get()
-        users[user] = result
+        users[user] = (subject, result)
         update_global_migration_metrics(global_metrics, subject, len(processes))
     
     migration_time = migration_time + timer()
@@ -125,9 +125,11 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
                             device["type"] = "Device"
                             device["_id"] = dev_id
                         else:
+                            sensor_time = -timer()
                             sensor, datapoints = dispatcher.dispatch(file, fp, acq_id, dev_id, user, metrics_args)
+                            sensor_time = sensor_time + timer()
                             if len(sensor):
-                                sensors.append(sensor)
+                                sensors.append({"time": sensor_time, **sensor})
                                 if len(datapoints):
                                     c_samples.insert([{"_id": uuid4(), **datapoint} for datapoint in datapoints])
                 if len(sensors):
