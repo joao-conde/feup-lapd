@@ -9,6 +9,7 @@ mongo_client = MongoClient(host='demdata_mongodb')
 db = mongo_client.get_database('demdata_db', CodecOptions(uuid_representation=JAVA_LEGACY))
 
 routes = [
+    '/acquisitions/ACQUISITION_ID/metrics', #For a given acquisition, get all metrics for all sensors of all devices
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics[?metric=METRIC[&gt=MIN_VALUE|&gte=MIN_VALUE][&lt=MAX_VALUE|&lte=MAX_VALUE]]', #For a given acquisition and device, returns all metrics for all sensors. Optionally, filter by sensors with a specific metric, optionally bound between a specific range
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics', #For a given acquisition, device and sensor, returns all metrics
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics/METRIC' #For a given acquisition, device, sensor and metric, return the value of the metric
@@ -17,7 +18,6 @@ routes = [
 @app.route('/')
 def hello_world():
     return jsonify(routes)
-
 
 # Obtains a nested property from a document, given a list of successive keys
 def get_nested_metric(metrics, metric_nested):
@@ -45,7 +45,23 @@ def is_value_within_limits(value, lt, lte, gt, gte):
             return False
     
     return True
-           
+
+
+@app.route('/acquisitions/<uuid:acquisitionId>/metrics')
+def get_acquisition_metrics(acquisitionId):
+    query = {'_id': UUIDLegacy(acquisitionId)}
+    projection = {'devices': 1}
+    query_result = db.acquisitions.find_one(query, projection)
+
+    result = []
+    if query_result is not None:
+        for device in query_result['devices']:
+            device_entry = {'device': device['model'], 'sensors': []}
+            for sensor in device['sensors']:
+                device_entry['sensors'].append({'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']})
+            result.append(device_entry)
+
+    return jsonify(result)           
 
 @app.route('/acquisitions/<uuid:acquisitionId>/devices/<uuid:deviceId>/metrics')
 def get_all_acquisition_device_metrics(acquisitionId, deviceId):
