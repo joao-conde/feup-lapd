@@ -9,7 +9,7 @@ mongo_client = MongoClient(host='demdata_mongodb')
 db = mongo_client.get_database('demdata_db', CodecOptions(uuid_representation=JAVA_LEGACY))
 
 routes = [
-    '/acquisitions/ACQUISITION_ID/metrics', #For a given acquisition, get all metrics for all sensors of all devices
+    '/acquisitions/ACQUISITION_ID/metrics[?sensor=SENSOR_TYPE]', #For a given acquisition, get all metrics for all sensors of all devices. Optionally, retrieve only metrics for a specific sensor
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/metrics[?metric=METRIC[&gt=MIN_VALUE|&gte=MIN_VALUE][&lt=MAX_VALUE|&lte=MAX_VALUE]]', #For a given acquisition and device, returns all metrics for all sensors. Optionally, filter by sensors with a specific metric, optionally bound between a specific range
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics', #For a given acquisition, device and sensor, returns all metrics
     '/acquisitions/ACQUISITION_ID/devices/DEVICE_ID/sensors/SENSOR_TYPE/metrics/METRIC' #For a given acquisition, device, sensor and metric, return the value of the metric
@@ -58,8 +58,13 @@ def get_acquisition_metrics(acquisitionId):
         for device in query_result['devices']:
             device_entry = {'device': device['model'], 'sensors': []}
             for sensor in device['sensors']:
-                device_entry['sensors'].append({'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']})
-            result.append(device_entry)
+                if request.args.get('sensor') is not None:
+                    if sensor['sensorType'].title() == request.args.get('sensor').title():
+                        device_entry['sensors'].append({'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']})
+                else:
+                    device_entry['sensors'].append({'sensor': sensor['sensorType'].title(), 'metrics': sensor['metrics']})
+            if len(device_entry['sensors']) > 0:
+                result.append(device_entry)
 
     return jsonify(result)           
 
