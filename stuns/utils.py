@@ -54,7 +54,7 @@ def produce_report(execution_metrics, users):
 
     with open("report.html", "w", encoding="utf-8") as out:
         out.write(template.render(
-            date=datetime.date.today().strftime("%B %d, %Y"),
+            date=datetime.datetime.now().strftime("%B %d, %Y %H:%M"),
             execution_metrics=execution_metrics,
             users=users
         ))

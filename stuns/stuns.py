@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from pymongo import MongoClient
 from threading import Thread
 import multiprocessing
+from timeit import default_timer as timer
 
 from sensors.sensor import sensor
 from dispatcher import dispatcher
@@ -26,6 +27,7 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
     # get db instace
     client, db, c_ds = get_mongo_client(mongo, database_name)
 
+    migration_time = -timer()
     if verbose: print("Calculating Dataset hash")
     ds_hash = get_dataset_hash(path)
 
@@ -53,17 +55,34 @@ def structure_the_unstructured(path, verbose, mongo, database_name, dataset_name
 
     d = dispatcher(verbose)  # create a dispatcher instance
     users = {}
+    global_metrics = {}
     # multiprocessing
     pool = multiprocessing.Pool()
     processes = []
     for user, uf in get_all_direct_subfolders(path):
         processes.append(pool.apply_async(process_user, args=([d, user, uf, verbose, metrics_args, mongo, database_name])))
     for p in processes:  # before producing the report, wait for workers
-        user, result = p.get()
-        users[user] = result
+        user, result, subject = p.get()
+        users[user] = (subject, result)
+        update_global_migration_metrics(global_metrics, subject, len(processes))
+    
+    migration_time = migration_time + timer()
+    global_metrics['migration_time'] = migration_time
 
-    produce_report(dict(), users)  # TODO: include global metrics
+    produce_report(global_metrics, users)
 
+
+def update_global_migration_metrics(global_metrics, subject, length):
+    """Updates the global metrics dictionary with information from a new subject"""
+    global_metrics['total_subjects'] = global_metrics.get('total_subjects', 0) + 1
+    global_metrics['male_subjects'] = global_metrics.get('male_subjects', 0) + 1 if subject.get('gender', None) == 'Male' else 0
+    global_metrics['female_subjects'] = global_metrics.get('total_subjects', 0) + 1 if subject.get('gender', None) == 'Female' else 0
+    global_metrics['max_age'] = max(global_metrics.get('max_age', 0), float(subject.get('age', 0)))
+    global_metrics['min_age'] = min(global_metrics.get('min_age', 1000000), float(subject.get('age', 1000000)))
+    global_metrics['avg_age'] = (global_metrics.get('avg_age', 0) * length + float(subject.get('age', 0))) / length
+    global_metrics['max_height'] = max(global_metrics.get('max_height', 0), float(subject.get('height', 0)))
+    global_metrics['min_height'] = min(global_metrics.get('min_height', 1000000), float(subject.get('height', 1000000)))
+    global_metrics['avg_height'] = (global_metrics.get('avg_height', 0) * length + float(subject.get('height', 0))) / length
 
 def create_report_folder(report_folder="report"):
     if os.path.exists(report_folder):
@@ -107,9 +126,11 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
                             device["type"] = "Device"
                             device["_id"] = dev_id
                         else:
+                            sensor_time = -timer()
                             sensor, datapoints = dispatcher.dispatch(file, fp, acq_id, dev_id, user, metrics_args)
+                            sensor_time = sensor_time + timer()
                             if len(sensor):
-                                sensors.append(sensor)
+                                sensors.append({"time": sensor_time, **sensor})
                                 if len(datapoints):
                                     c_samples.insert([{"_id": uuid4(), **datapoint} for datapoint in datapoints])
                 if len(sensors):
@@ -119,7 +140,7 @@ def process_user(dispatcher, user, uf, verbose, metrics_args, mongo, database_na
     if subject:
         c_acq.update_one({"_id": acq_id}, {"$set": {"subject": subject}})
     client.close()
-    return user, result
+    return user, result, subject
 
 
 def parse_args():

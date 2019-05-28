@@ -3,15 +3,16 @@
 	<div class="uk-card uk-card-primary uk-card-body">
 		<h4 class="uk-card-title">Device: {{ device.model }}</h4>
 		<ul class="uk-list uk-list-divider">
-		{% if sensor_arr|length > 0 %}
+		{% if sensor_arr|length > 1 %}
 			{% for sensor in sensor_arr %}
 				{% if sensor.sensorType|title != 'All' %}
 					<li>
 						<div class="uk-card uk-card-secondary uk-card-body">
 							<h5 class="uk-card-title">Sensor: {{ sensor.sensorType|title }}</h5>
+							<p style="color: white;">Time spent: {{'%.2f'|format(sensor.time)}} seconds</p>
 							<strong><a style="text-decoration:underline;color:aquamarine;" href="report/{{sensor.metrics['hash']}}.html">Complete Report</a></strong>
 							<h6>Relevant statistics:</h6>
-							<ul class="uk-list">
+							<ul class="uk-list metric-list">
 								{% for m,v in sensor.metrics.items() %}
 									<li>
 										{% if m in ["x", "y", "z"] %}
@@ -28,7 +29,7 @@
 				{% endif %}
 			{% endfor %}
 		{% else %}
-			<h5>No sensors found for this device.</h5>
+			<h5 style="color: black;">No sensors found for this device.</h5>
 		{% endif %}
 		</ul>
 		<br>
