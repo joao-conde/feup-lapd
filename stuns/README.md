@@ -1,6 +1,8 @@
 # STUNS
 > Structring The UNStructured command line tool
 
+Requires: python3-tk:  `sudo apt-get install python3-tk`
+
 ## Execution
 Simply call `python stuns/stuns.py -p <DATA_DIR>` where `<DATA_DIR>` is the path to a folder containing "user" folders.
 
