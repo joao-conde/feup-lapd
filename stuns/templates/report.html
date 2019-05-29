@@ -41,7 +41,7 @@
             <ul class="uk-list">
                 {% for k,v in execution_metrics.items() %}
                     {% if k == 'migration_time' %}
-                        <li><b>{{k}}:</b> {{'%.3f'|format(v)}}</li>
+                        <li><b>{{k}}:</b> {{"%d hours %d minutes %d seconds" % (v//3600, v//60, v%60)}}</li>
                     {% else %}
                         <li><b>{{k}}:</b> {{v}}</li>
                     {% endif %}
