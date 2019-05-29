@@ -21,7 +21,7 @@ def get_all_files_recursively(root_dir):
 
 
 def hash_file(filename, hasher=hashlib.sha256(), blocksize=1 << 16):
-    """Hashes a file and returns its hash, using buffers for better performance"""
+    """returns a file's hash, uses buffers for better performance"""
     with open(filename, 'rb') as f:
         buf = f.read(blocksize)
         while len(buf) > 0:
@@ -31,7 +31,7 @@ def hash_file(filename, hasher=hashlib.sha256(), blocksize=1 << 16):
 
 
 def etree_to_dict(t):
-    """parses an etree (xml) into a dic. original: https://stackoverflow.com/questions/7684333/converting-xml-to-dictionary-using-elementtree"""
+    """returns a python dict corresponding to a parsed etree (xml)"""
     d = {}
     children = list(map(etree_to_dict, t.getchildren()))
     if children:
@@ -43,7 +43,7 @@ def etree_to_dict(t):
 
 
 def produce_report(execution_metrics, users):
-    """Apply a Jinja2 template with the data so as to produce the execution report"""
+    """apply a Jinja2 template with the data so as to produce the execution report"""
     env = Environment(
         loader=PackageLoader('stuns', 'templates'),
         autoescape=select_autoescape(['html', 'xml'])
@@ -61,6 +61,7 @@ def produce_report(execution_metrics, users):
 
 
 def zip_dataset(path, zip_name):
+    """zips a dataset folder in the same path"""
     ziph = zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED)
     for root, dirs, files in os.walk(path):
         for file in files:
@@ -69,6 +70,7 @@ def zip_dataset(path, zip_name):
 
 
 def get_dataset_hash(path):
+    """returns a dataset hash, created from hashing a zipped version of that dataset"""
     temp_zip_name = "temp.zip"
     zip_dataset(path, temp_zip_name)
     ds_hash = hash_file(temp_zip_name)

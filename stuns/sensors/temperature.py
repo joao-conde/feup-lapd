@@ -14,6 +14,9 @@ class temperature(sensor):
 
     
     def extract_metrics(self, metrics={}):
+        """Extracts metrics for the temperature sensor
+        Appends the metrics to metrics dict with key "temperature" and returns it
+        """
         metrics = super().extract_metrics(metrics)
         metrics["temperature"] = self.column_metrics("temperature")
         return metrics

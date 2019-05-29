@@ -17,6 +17,7 @@ class all(sensor):
         return []
 
     def extract_metrics(self, metrics={}):
+        """Extracts file metrics and generates pandas profile"""
         # global file metrics
         metrics = self.file_metrics(metrics)
         self.generate_pandas_profiling(metrics["hash"])

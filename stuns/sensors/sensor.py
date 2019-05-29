@@ -37,6 +37,7 @@ class sensor:
         pass
 
     def column_metrics(self, col_name=None, col=None):
+        """Extracts column metrics such as values range and null value count"""
         if col_name: col = self.df[col_name]
         mi, ma = col.min(), col.max()
         res = {
@@ -49,6 +50,7 @@ class sensor:
         return res
 
     def file_metrics(self, metrics={}):
+        """Extracts file information such as name, last update date, number of rows and it's hash"""
         metrics["filename"] = self.file
         metrics["structured_at"] = time.time()
         metrics["rows"] = len(self.df)
@@ -56,6 +58,7 @@ class sensor:
         return metrics
 
     def generate_pandas_profiling(self, hash):
+        """Generates pandas profiling graphs"""
         filename = "report/%s.html" % hash
         if self.metrics_args["pandas_profiling"]:
             profile = pp.ProfileReport(self.df, pool_size=1)
