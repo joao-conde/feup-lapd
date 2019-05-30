@@ -27,16 +27,16 @@ services:
             - demdata_mongodb:demdata_mongodb
         depends_on:
             - demdata_mongodb
-    # demdata_ui:
-    #     image: demdata/ui
-    #     networks:
-    #         - demdata_network
-    #     expose:
-    #         - 80
-    #     links:
-    #         - demdata_api:demdata_api
-    #     depends_on:
-    #       - demdata_api
+    demdata_ui:
+        image: demdata/ui
+        networks:
+            - demdata_network
+        expose:
+            - 80
+        links:
+            - demdata_api:demdata_api
+        depends_on:
+          - demdata_api
     nginx_proxy:
         image: nginx:alpine
         networks:
